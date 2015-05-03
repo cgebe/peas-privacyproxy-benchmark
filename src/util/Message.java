@@ -17,6 +17,11 @@ public class Message {
 	private String akey;
 	private String skey;
 	
+	private String rHost;
+	private String rPort;
+	
+	private String iHost;
+	private String iPort;
 
 	public Message() {
 		this.command = null;
@@ -120,13 +125,61 @@ public class Message {
 		}
 		
 		if (this.skey != null) {
-			msg.put("skey", this.skey);
+			msg.put("s_key", this.skey);
 		}
 		
 		if (this.akey != null) {
-			msg.put("akey", this.akey);
+			msg.put("a_key", this.akey);
+		}
+		
+		if (this.rHost != null) {
+			msg.put("r_host", this.rHost);
+		}
+		
+		if (this.rPort != null) {
+			msg.put("r_port", this.rPort);
+		}
+		
+		if (this.iHost != null) {
+			msg.put("i_host", this.iHost);
+		}
+		
+		if (this.iPort != null) {
+			msg.put("i_port", this.iPort);
 		}
 		
 		return JSONValue.toJSONString(msg);
+	}
+
+	public String getRecieverHost() {
+		return rHost;
+	}
+
+	public void setRecieverHost(String rHost) {
+		this.rHost = rHost;
+	}
+
+	public String getRecieverPort() {
+		return rPort;
+	}
+
+	public void setRecieverPort(String rPort) {
+		this.rPort = rPort;
+	}
+
+	public String getIssuerHost() {
+		return iHost;
+	}
+
+	public void setIssuerHost(String iHost) {
+		this.iHost = iHost;
+	}
+
+	public String getIssuerPort() {
+		return iPort;
+	}
+
+	public void setIssuerPort(String iPort) {
+		this.iPort = iPort;
 	}
 }

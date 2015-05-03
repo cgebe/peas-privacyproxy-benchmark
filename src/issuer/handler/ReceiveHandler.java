@@ -1,13 +1,16 @@
-package reciever.handler;
+package issuer.handler;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import util.Message;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.util.CharsetUtil;
 
-public class RecieveHandler extends SimpleChannelInboundHandler<String> {
+public class ReceiveHandler extends SimpleChannelInboundHandler<String> {
 	
 	
 	private JSONParser parser = new JSONParser();
@@ -29,12 +32,15 @@ public class RecieveHandler extends SimpleChannelInboundHandler<String> {
 		msg.setRequest((String) obj.get("request"));
 		msg.setSymmetricKey((String) obj.get("skey"));
 		msg.setAsymmetricKey((String) obj.get("akey"));
-		super.channelRead(ctx, msg);
+		
+		//String jsonPayload = "...";
+		//ByteBuf buffer = Unpooled.copiedBuffer(jsonPayload, CharsetUtil.UTF_8);
+		//ctx.writeAndFlush(buffer);
 	}
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) {
-        
+        ctx.flush();
     }
 
     @Override

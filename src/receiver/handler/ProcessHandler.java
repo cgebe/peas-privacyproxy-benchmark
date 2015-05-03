@@ -1,4 +1,4 @@
-package reciever.handler;
+package receiver.handler;
 
 import java.util.Random;
 
@@ -15,11 +15,14 @@ public class ProcessHandler extends SimpleChannelInboundHandler<Message> {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-
+    	System.out.println("connection established");
     }
     
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, Message msg) throws Exception {
+		// maybe unnecessary
+		System.out.println("message recieved");
+		System.out.println(msg.toJSONString());
 		msg.setQueryId(randomString(16));
 		super.channelRead(ctx, msg);
 	}

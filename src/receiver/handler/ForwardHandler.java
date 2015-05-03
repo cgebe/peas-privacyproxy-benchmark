@@ -1,5 +1,7 @@
-package reciever.handler;
+package receiver.handler;
 
+import receiver.handler.out.SendChannelInitializer;
+import util.Message;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
@@ -8,44 +10,11 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelOption;
+import io.netty.channel.SimpleChannelInboundHandler;
 
-public class ForwardHandler extends ChannelInboundHandlerAdapter {
-
-	private final String remoteHost;
-    private final int remotePort;
+public class ForwardHandler extends SimpleChannelInboundHandler<Message> {
 
     private volatile Channel outboundChannel;
-
-    public ForwardHandler(String remoteHost, int remotePort) {
-        this.remoteHost = remoteHost;
-        this.remotePort = remotePort;
-    }
-
-    @Override
-    public void channelActive(ChannelHandlerContext ctx) {
-        final Channel inboundChannel = ctx.channel();
-
-        // Start the connection attempt.
-        Bootstrap b = new Bootstrap();
-        b.group(inboundChannel.eventLoop())
-         .channel(ctx.channel().getClass())
-         .handler(new ReturnHandler(inboundChannel))
-         .option(ChannelOption.AUTO_READ, false);
-        ChannelFuture f = b.connect(remoteHost, remotePort);
-        outboundChannel = f.channel();
-        f.addListener(new ChannelFutureListener() {
-            @Override
-            public void operationComplete(ChannelFuture future) {
-                if (future.isSuccess()) {
-                    // connection complete start to read first data
-                    inboundChannel.read();
-                } else {
-                    // Close the connection if the connection attempt has failed.
-                    inboundChannel.close();
-                }
-            }
-        });
-    }
 
     @Override
     public void channelRead(final ChannelHandlerContext ctx, Object msg) {
@@ -66,15 +35,15 @@ public class ForwardHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
-        if (outboundChannel != null) {
-            closeOnFlush(outboundChannel);
-        }
+        //if (outboundChannel != null) {
+           // closeOnFlush(outboundChannel);
+        //}
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         cause.printStackTrace();
-        closeOnFlush(ctx.channel());
+        //closeOnFlush(ctx.channel());
     }
 
     /**
@@ -85,6 +54,32 @@ public class ForwardHandler extends ChannelInboundHandlerAdapter {
             ch.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
         }
     }
+
+	@Override
+	protected void channelRead0(ChannelHandlerContext ctx, Message msg) throws Exception {
+		final Channel inboundChannel = ctx.channel();
+
+        // Start the connection attempt.
+        Bootstrap b = new Bootstrap();
+        b.group(inboundChannel.eventLoop())
+         .channel(ctx.channel().getClass())
+         .handler(new SendChannelInitializer(inboundChannel))
+         .option(ChannelOption.AUTO_READ, false);
+        ChannelFuture f = b.connect(msg.getIssuerHost(), Integer.parseInt(msg.getIssuerPort()));
+        outboundChannel = f.channel();
+        f.addListener(new ChannelFutureListener() {
+            @Override
+            public void operationComplete(ChannelFuture future) {
+                if (future.isSuccess()) {
+                    // connection complete start to read first data
+                	outboundChannel.writeAndFlush(msg);
+                } else {
+                    // Close the connection if the connection attempt has failed.
+                    inboundChannel.close();
+                }
+            }
+        });
+	}
 
 
 

@@ -1,6 +1,6 @@
-package reciever.server;
+package receiver.server;
 
-import reciever.handler.RecieverChannelInitializer;
+import receiver.handler.ReceiverChannelInitializer;
 import util.Config;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -14,26 +14,26 @@ import io.netty.handler.logging.LoggingHandler;
 /**
  * Discards any incoming data.
  */
-public class RecieverServer {
+public class ReceiverServer {
 
     private int port;
 
-    public RecieverServer(int port) {
+    public ReceiverServer(int port) {
         this.port = port;
     }
 
     public void run() throws Exception {
-        EventLoopGroup bossGroup = new NioEventLoopGroup(); // (1)
-        EventLoopGroup workerGroup = new NioEventLoopGroup();
+        EventLoopGroup bossGroup = new NioEventLoopGroup(1); // (1)
+        EventLoopGroup workerGroup = new NioEventLoopGroup(3);
         try {
             ServerBootstrap b = new ServerBootstrap(); // (2)
             b.group(bossGroup, workerGroup)
              .channel(NioServerSocketChannel.class) // (3)
-             .handler(new LoggingHandler(LogLevel.DEBUG))
-             .childHandler(new RecieverChannelInitializer())
-             .option(ChannelOption.SO_BACKLOG, 128)          // (5)
-             .childOption(ChannelOption.AUTO_READ, false)
-             .childOption(ChannelOption.SO_KEEPALIVE, true); // (6)
+             .handler(new LoggingHandler(LogLevel.INFO))
+             .childHandler(new ReceiverChannelInitializer());
+             //.option(ChannelOption.SO_BACKLOG, 128);        // (5)
+             //.childOption(ChannelOption.AUTO_READ, true)
+             //.childOption(ChannelOption.SO_KEEPALIVE, true); // (6)
 
             // Bind and start to accept incoming connections.
             ChannelFuture f = b.bind(port).sync(); // (7)
@@ -49,6 +49,7 @@ public class RecieverServer {
     }
 
     public static void main(String[] args) throws Exception {
-        new RecieverServer(Integer.parseInt(Config.getInstance().getValue("port"))).run();
+        //new RecieverServer(Integer.parseInt(Config.getInstance().getValue("port"))).run();
+    	new ReceiverServer(11777).run();
     }
 }

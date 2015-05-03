@@ -23,7 +23,7 @@ public class IssuerChannelInitializer extends ChannelInitializer<SocketChannel> 
 		pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(120));
         pipeline.addLast("stringDecoder", new StringDecoder());
         pipeline.addLast("stringEncoder", new StringEncoder());
-        pipeline.addLast(new RecieveHandler());
+        pipeline.addLast(new ReceiveHandler());
 	}
 
 }
