@@ -35,7 +35,7 @@ public class PEASHeader {
 			request.append(this.getStatus());
 		} 
 		
-		if (this.getProtocol() != null && this.getBodyLength() > 0) {
+		if (this.getProtocol() != null) {
 			request.append(System.lineSeparator());
 			request.append("Protocol: ");
 			request.append(this.getProtocol());
