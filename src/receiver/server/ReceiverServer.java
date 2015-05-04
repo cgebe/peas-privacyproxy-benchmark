@@ -1,6 +1,6 @@
 package receiver.server;
 
-import receiver.handler.ReceiverChannelInitializer;
+import receiver.handler.upstream.ReceiverChannelInitializer;
 import util.Config;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;

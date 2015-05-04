@@ -47,8 +47,6 @@ public class PEASDecoder extends MessageToMessageDecoder<ByteBuf> {
 	@Override
 	protected void decode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) throws Exception {
 		if (!writeBody) {
-			System.out.println(msg.toString(charset));
-			
 			if (firstLine) {
 				String line = msg.toString(charset);
 				String[] values = p.split(line);
@@ -62,7 +60,6 @@ public class PEASDecoder extends MessageToMessageDecoder<ByteBuf> {
 				
 				// reading header is finished
 				if (headerField.equals("")) {
-					System.out.println("finished");
 					writeBody = true;
 					body = new PEASBody(header.getBodyLength());
 				}
@@ -86,8 +83,7 @@ public class PEASDecoder extends MessageToMessageDecoder<ByteBuf> {
 				}
 			}
 		} else {
-			System.out.println("writing body");
-			if (writeIndex >= header.getBodyLength()) {
+			if (header.getBodyLength() <= 0) {
 				if (header.getCommand().equals("KEY") || header.getCommand().equals("QUERY")) {
 					out.add(new PEASRequest(header, body));
 				} else {
@@ -97,10 +93,22 @@ public class PEASDecoder extends MessageToMessageDecoder<ByteBuf> {
 				writeBody = false;
 				this.header = new PEASHeader();
 			} else {
-				System.out.println(writeIndex);
 				writeIndex += msg.capacity();
-				System.out.println(body.getBody().writerIndex());
 				body.getBody().writeBytes(msg);
+				
+				System.out.println(msg.toString());
+				System.out.println("wrote " + writeIndex + " bytes");
+				
+				if (writeIndex >= header.getBodyLength()) {
+					if (header.getCommand().equals("QUERY")) {
+						out.add(new PEASRequest(header, body));
+					} else {
+						out.add(new PEASResponse(header, body));
+					}
+					writeIndex = 0;
+					writeBody = false;
+					this.header = new PEASHeader();
+				}
 			}
 		}
 		//out.add(PEASParser.parse(json));
