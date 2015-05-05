@@ -19,23 +19,23 @@ public class ReturnHandler extends SimpleChannelInboundHandler<PEASObject> {
     }
     
     @Override public void channelActive(ChannelHandlerContext ctx) {
-    	ctx.writeAndFlush(obj);
-        /*
+    	ChannelFuture f = ctx.writeAndFlush(obj);
+
         f.addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture future) {
             	//future.channel().close();
                 if (future.isSuccess()) {
                 	//future.channel().writeAndFlush(msg);
-                	System.out.println("success write");
+                	System.out.println("successful forward");
                     // ctx.channel().read();
                 } else {
                     //future.channel().close();
-                    System.out.println("failed write");
+                    System.out.println("failed forward");
                 }
             }
         });
-        */
+        
     }
 
     @Override
@@ -46,21 +46,22 @@ public class ReturnHandler extends SimpleChannelInboundHandler<PEASObject> {
 
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, PEASObject toReturn) throws Exception {
-        inboundChannel.writeAndFlush(toReturn);
-        /*
-        .addListener(new ChannelFutureListener() {
+        ChannelFuture f = inboundChannel.writeAndFlush(toReturn);
+        
+        f.addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture future) {
             	future.channel().close();
                 if (future.isSuccess()) {
-                	System.out.println("returned");
+                	System.out.println("successful return");
                    // ctx.channel().read();
                 } else {
+                	System.out.println("failed return");
                     future.channel().close();
                 }
             }
         });
-        */
+        
 	}
 
 

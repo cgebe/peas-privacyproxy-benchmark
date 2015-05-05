@@ -14,8 +14,9 @@ public class PEASPrinter extends SimpleChannelInboundHandler<PEASObject> {
     }
 
 	@Override
-	protected void channelRead0(ChannelHandlerContext arg0, PEASObject obj) throws Exception {
+	protected void channelRead0(ChannelHandlerContext ctx, PEASObject obj) throws Exception {
 		System.out.println(obj.toString());
+		ctx.fireChannelRead(obj);
 	}
     
 

@@ -96,9 +96,6 @@ public class PEASDecoder extends MessageToMessageDecoder<ByteBuf> {
 				writeIndex += msg.capacity();
 				body.getBody().writeBytes(msg);
 				
-				System.out.println(msg.toString());
-				System.out.println("wrote " + writeIndex + " bytes");
-				
 				if (writeIndex >= header.getBodyLength()) {
 					if (header.getCommand().equals("QUERY")) {
 						out.add(new PEASRequest(header, body));

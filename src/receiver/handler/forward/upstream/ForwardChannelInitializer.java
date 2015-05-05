@@ -3,6 +3,8 @@ package receiver.handler.forward.upstream;
 import protocol.PEASObject;
 import codec.JSONDecoder;
 import codec.JSONEncoder;
+import codec.PEASDecoder;
+import codec.PEASEncoder;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
@@ -29,7 +31,7 @@ public class ForwardChannelInitializer extends ChannelInitializer<SocketChannel>
 	@Override
 	protected void initChannel(SocketChannel ch) throws Exception {
 		pipeline = ch.pipeline();
-		pipeline.addLast(new LoggingHandler(LogLevel.DEBUG));
+		pipeline.addLast(new LoggingHandler(LogLevel.INFO));
 		//pipeline.addLast(new DelimiterBasedFrameDecoder(8192, Delimiters.lineDelimiter()));
 		pipeline.addLast("framedecoder", new DelimiterBasedFrameDecoder(8192, Delimiters.lineDelimiter()));
 		//pipeline.addLast("framedecoder", new LineBasedFrameDecoder(120));
@@ -37,6 +39,8 @@ public class ForwardChannelInitializer extends ChannelInitializer<SocketChannel>
         //pipeline.addLast("stringencoder", new StringEncoder());
         //pipeline.addLast("jsondecoder", new JSONDecoder());
         //pipeline.addLast("jsonencoder", new JSONEncoder());
+        pipeline.addLast("peasdecoder", new PEASDecoder());
+        pipeline.addLast("peasencoder", new PEASEncoder());
         pipeline.addLast("returner", new ReturnHandler(inboundChannel, obj));
 	}
 

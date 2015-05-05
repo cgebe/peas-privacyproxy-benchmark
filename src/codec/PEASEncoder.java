@@ -1,7 +1,9 @@
 package codec;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.MessageToByteEncoder;
 import io.netty.handler.codec.MessageToMessageEncoder;
 
 import java.nio.CharBuffer;
@@ -10,7 +12,7 @@ import java.util.List;
 
 import protocol.PEASObject;
 
-public class PEASEncoder extends MessageToMessageEncoder<PEASObject>{
+public class PEASEncoder extends MessageToByteEncoder<PEASObject>{
 	
 	 // TODO Use CharsetEncoder instead.
     private final Charset charset;
@@ -32,11 +34,14 @@ public class PEASEncoder extends MessageToMessageEncoder<PEASObject>{
         this.charset = charset;
     }
 
+
 	@Override
-	protected void encode(ChannelHandlerContext ctx, PEASObject obj, List<Object> out) throws Exception {
-		out.add(ByteBufUtil.encodeString(ctx.alloc(), CharBuffer.wrap(obj.getHeader().toString()), charset));
-		out.add(obj.getBody());
-		
-		//out.add(obj.toString());
+	protected void encode(ChannelHandlerContext ctx, PEASObject obj, ByteBuf out) throws Exception {
+		// write header to downstream
+		out.writeBytes(ByteBufUtil.encodeString(ctx.alloc(), CharBuffer.wrap(obj.getHeader().toString()), charset));
+		// write body to downstream
+		out.writeBytes(obj.getBody().getBody());
+		// append line separator at the end of the body for framing
+		out.writeBytes(ByteBufUtil.encodeString(ctx.alloc(), CharBuffer.wrap(System.lineSeparator()), charset));
 	}
 }

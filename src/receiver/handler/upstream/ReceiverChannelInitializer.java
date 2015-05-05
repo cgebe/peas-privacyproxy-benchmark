@@ -32,10 +32,10 @@ public class ReceiverChannelInitializer extends ChannelInitializer<SocketChannel
         //pipeline.addLast("jsonencoder", new JSONEncoder());
         pipeline.addLast("peasdecoder", new PEASDecoder());
         pipeline.addLast("peasencoder", new PEASEncoder());
-        pipeline.addLast("sprocessor", new PEASPrinter());
+        pipeline.addLast("peasprinter", new PEASPrinter());
         //pipeline.addLast("sprocessor", new StringPrinter());
         //pipeline.addLast("processor", new ProcessHandler());
-        //pipeline.addLast("forwarder", new ForwardHandler());
+        pipeline.addLast("forwarder", new ForwardHandler());
 	}
 
 }

@@ -15,37 +15,6 @@ import io.netty.channel.SimpleChannelInboundHandler;
 
 public class ForwardHandler extends SimpleChannelInboundHandler<PEASObject> {
 
-    private volatile Channel outboundChannel;
-
-    @Override
-    public void channelRead(final ChannelHandlerContext ctx, Object msg) {
-        if (outboundChannel.isActive()) {
-            outboundChannel.writeAndFlush(msg).addListener(new ChannelFutureListener() {
-                @Override
-                public void operationComplete(ChannelFuture future) {
-                    if (future.isSuccess()) {
-                        // was able to flush out data, start to read the next chunk
-                        ctx.channel().read();
-                    } else {
-                        future.channel().close();
-                    }
-                }
-            });
-        }
-    }
-
-    @Override
-    public void channelInactive(ChannelHandlerContext ctx) {
-        //if (outboundChannel != null) {
-           // closeOnFlush(outboundChannel);
-        //}
-    }
-
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        cause.printStackTrace();
-        //closeOnFlush(ctx.channel());
-    }
 
     /**
      * Closes the specified channel after all queued write requests are flushed.
@@ -58,8 +27,10 @@ public class ForwardHandler extends SimpleChannelInboundHandler<PEASObject> {
 
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, PEASObject obj) throws Exception {
+		System.out.println("forward handler called");
 		final Channel inboundChannel = ctx.channel();
-
+		System.out.println(obj.getHeader().getIssuerAddress());
+		System.out.println(obj.getHeader().getIssuerPort());
         // Start the connection attempt.
         Bootstrap b = new Bootstrap();
         b.group(inboundChannel.eventLoop())
@@ -67,26 +38,32 @@ public class ForwardHandler extends SimpleChannelInboundHandler<PEASObject> {
          .handler(new ForwardChannelInitializer(inboundChannel, obj))
          .option(ChannelOption.AUTO_READ, false);
         
-        b.connect(obj.getHeader().getIssuerAddress(), obj.getHeader().getIssuerPort());
-        
-        /*
-        outboundChannel = f.channel();
+        ChannelFuture f = b.connect(obj.getHeader().getIssuerAddress(), obj.getHeader().getIssuerPort());
+       
         f.addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture future) {
                 if (future.isSuccess()) {
                     // connection complete start to read first data
                 	//outboundChannel.writeAndFlush(obj);
+                	System.out.println("connected to issuer");
                 } else {
                 	// TODO: normally send peas response with status code that issuer is not available
                 	
                     // Close the connection if the connection attempt has failed.
+                	System.out.println("not connected to issuer");
                     inboundChannel.close();
                 }
             }
         });
-        */
+        
 	}
+	
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+        cause.printStackTrace();
+        //closeOnFlush(ctx.channel());
+    }
 
 
 
