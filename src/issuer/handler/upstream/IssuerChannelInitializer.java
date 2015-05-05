@@ -27,16 +27,16 @@ public class IssuerChannelInitializer extends ChannelInitializer<SocketChannel> 
         //pipeline.addLast("stringDecoder", new StringDecoder());
         //pipeline.addLast("stringEncoder", new StringEncoder());
 		pipeline.addLast("peasdecoder", new PEASDecoder());
-        pipeline.addLast("peasecoder", new PEASEncoder());
+        pipeline.addLast("peasencoder", new PEASEncoder());
         pipeline.addLast("peasprinter", new PEASPrinter());
         pipeline.addLast("keyhandler", new KeyHandler());
-        //pipeline.addLast("queryhandler", new QueryHandler());
+        pipeline.addLast("queryhandler", new QueryHandler());
         // TODO
         //pipeline.addLast("decrypter", new DecryptHandler());
         //pipeline.addLast("encrypter", new EncryptHandler());
         //pipeline.addLast("decider", new DecidingHandler());
         
-        pipeline.addLast("dispatcher", new DispatchHandler());
+        //pipeline.addLast("dispatcher", new DispatchHandler());
 	}
 
 }

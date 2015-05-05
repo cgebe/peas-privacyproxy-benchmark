@@ -27,16 +27,13 @@ public class ForwardHandler extends SimpleChannelInboundHandler<PEASObject> {
 
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, PEASObject obj) throws Exception {
-		System.out.println("forward handler called");
 		final Channel inboundChannel = ctx.channel();
-		System.out.println(obj.getHeader().getIssuerAddress());
-		System.out.println(obj.getHeader().getIssuerPort());
+
         // Start the connection attempt.
         Bootstrap b = new Bootstrap();
         b.group(inboundChannel.eventLoop())
          .channel(ctx.channel().getClass())
-         .handler(new ForwardChannelInitializer(inboundChannel, obj))
-         .option(ChannelOption.AUTO_READ, false);
+         .handler(new ForwardChannelInitializer(inboundChannel, obj));
         
         ChannelFuture f = b.connect(obj.getHeader().getIssuerAddress(), obj.getHeader().getIssuerPort());
        

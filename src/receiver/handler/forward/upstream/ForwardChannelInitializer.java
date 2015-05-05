@@ -1,6 +1,7 @@
 package receiver.handler.forward.upstream;
 
 import protocol.PEASObject;
+import receiver.handler.upstream.PEASPrinter;
 import codec.JSONDecoder;
 import codec.JSONEncoder;
 import codec.PEASDecoder;
@@ -41,6 +42,7 @@ public class ForwardChannelInitializer extends ChannelInitializer<SocketChannel>
         //pipeline.addLast("jsonencoder", new JSONEncoder());
         pipeline.addLast("peasdecoder", new PEASDecoder());
         pipeline.addLast("peasencoder", new PEASEncoder());
+        pipeline.addLast("peasprinter", new PEASPrinter());
         pipeline.addLast("returner", new ReturnHandler(inboundChannel, obj));
 	}
 

@@ -1,6 +1,7 @@
 package codec;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
 
@@ -96,7 +97,7 @@ public class PEASDecoder extends MessageToMessageDecoder<ByteBuf> {
 				writeIndex += msg.capacity();
 				body.getBody().writeBytes(msg);
 				
-				if (writeIndex >= header.getBodyLength()) {
+				if (writeIndex + 1 >= header.getBodyLength()) {
 					if (header.getCommand().equals("QUERY")) {
 						out.add(new PEASRequest(header, body));
 					} else {
