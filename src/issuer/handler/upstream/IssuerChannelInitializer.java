@@ -2,6 +2,7 @@ package issuer.handler.upstream;
 
 import receiver.handler.upstream.PEASPrinter;
 import codec.PEASDecoder;
+import codec.PEASDecoder3;
 import codec.PEASEncoder;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
@@ -22,11 +23,11 @@ public class IssuerChannelInitializer extends ChannelInitializer<SocketChannel> 
 	protected void initChannel(SocketChannel ch) throws Exception {
 		pipeline = ch.pipeline();
 		//pipeline.addLast(new LoggingHandler(LogLevel.INFO));
-		pipeline.addLast(new DelimiterBasedFrameDecoder(8192, Delimiters.lineDelimiter()));
+		//pipeline.addLast("framedecoder", new DelimiterBasedFrameDecoder(8192, Delimiters.lineDelimiter()));
 		//pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(120));
         //pipeline.addLast("stringDecoder", new StringDecoder());
         //pipeline.addLast("stringEncoder", new StringEncoder());
-		pipeline.addLast("peasdecoder", new PEASDecoder());
+		pipeline.addLast("peasdecoder", new PEASDecoder3());
         pipeline.addLast("peasencoder", new PEASEncoder());
         pipeline.addLast("peasprinter", new PEASPrinter());
         pipeline.addLast("keyhandler", new KeyHandler());

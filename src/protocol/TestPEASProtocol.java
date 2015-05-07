@@ -1,7 +1,10 @@
 package protocol;
 
+import java.nio.charset.Charset;
+
 import io.netty.buffer.ByteBuf;
 
+import org.apache.commons.codec.binary.Base64;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -16,7 +19,58 @@ public class TestPEASProtocol {
 		long start_time;
 		long end_time;
 		
+		String c = "GET /search?q= HTTP/1.1 rettttbnntzjnttttttrtgbvtbnuzjgrtbbvrthnuntjrnbv niz8t78jtbntvubzufjmhn 7bu7vjtbznbtttttttwsbtrebtrhnbtzntze4ghrt" + System.lineSeparator()
+				 + "Host: www.bing.comv5heezhbrt6vjhnrb6tjtvn brnk7dfggvbiuiguioveruiovjhnuioerjnhvujneruijnvbiejriovjioermnvoieroeigboenob"
+		+ "Host: www.bing.comv5heezhbrt6vjhnrb6tjtvn brnk7dfggvbiuiguioveruiovjhnuioerjnhvujneruijnvbiejriovjioermnvoieroeigboenob"
+		+ "Host: www.bing.comv5heezhbrt6vjhnrb6tjtvn brnk7dfggvbiuiguioveruiovjhnuioerjnhvujneruijnvbiejriovjioermnvoieroeigboenob"
+		+ "Host: www.bing.comv5heezhbrt6vjhnrb6tjtvn brnk7dfggvbiuiguioveruiovjhnuioerjnhvujneruijnvbiejriovjioermnvoieroeigboenob"
+		+ "Host: www.bing.comv5heezhbrt6vjhnrb6tjtvn brnk7dfggvbiuiguioveruiovjhnuioerjnhvujneruijnvbiejriovjioermnvoieroeigboenob"
+		+ "Host: www.bing.comv5heezhbrt6vjhnrb6tjtvn brnk7dfggvbiuiguioveruiovjhnuioerjnhvujneruijnvbiejriovjioermnvoieroeigboenob"
+		+ "Host: www.bing.comv5heezhbrt6vjhnrb6tjtvn brnk7dfggvbiuiguioveruiovjhnuioerjnhvujneruijnvbiejriovjioermnvoieroeigboenob"
+		+ "Host: www.bing.comv5heezhbrt6vjhnrb6tjtvn brnk7dfggvbiuiguioveruiovjhnuioerjnhvujneruijnvbiejriovjioermnvoieroeigboenob"
+		+ "Host: www.bing.comv5heezhbrt6vjhnrb6tjtvn brnk7dfggvbiuiguioveruiovjhnuioerjnhvujneruijnvbiejriovjioermnvoieroeigboenob"
+		+ "Host: www.bing.comv5heezhbrt6vjhnrb6tjtvn brnk7dfggvbiuiguioveruiovjhnuioerjnhvujneruijnvbiejriovjioermnvoieroeigboenob"
+		+ "Host: www.bing.comv5heezhbrt6vjhnrb6tjtvn brnk7dfggvbiuiguioveruiovjhnuioerjnhvujneruijnvbiejriovjioermnvoieroeigboenob"
+		+ "Host: www.bing.comv5heezhbrt6vjhnrb6tjtvn brnk7dfggvbiuiguioveruiovjhnuioerjnhvujneruijnvbiejriovjioermnvoieroeigboenob"
+		+ "Host: www.bing.comv5heezhbrt6vjhnrb6tjtvn brnk7dfggvbiuiguioveruiovjhnuioerjnhvujneruijnvbiejriovjioermnvoieroeigboenob"
+		+ "Host: www.bing.comv5heezhbrt6vjhnrb6tjtvn brnk7dfggvbiuiguioveruiovjhnuioerjnhvujneruijnvbiejriovjioermnvoieroeigboenob"
+		+ "Host: www.bing.comv5heezhbrt6vjhnrb6tjtvn brnk7dfggvbiuiguioveruiovjhnuioerjnhvujneruijnvbiejriovjioermnvoieroeigboenob"
+		+ "Host: www.bing.comv5heezhbrt6vjhnrb6tjtvn brnk7dfggvbiuiguioveruiovjhnuioerjnhvujneruijnvbiejriovjioermnvoieroeigboenob"
+		+ "Host: www.bing.comv5heezhbrt6vjhnrb6tjtvn brnk7dfggvbiuiguioveruiovjhnuioerjnhvujneruijnvbiejriovjioermnvoieroeigboenob"
+		+ "Host: www.bing.comv5heezhbrt6vjhnrb6tjtvn brnk7dfggvbiuiguioveruiovjhnuioerjnhvujneruijnvbiejriovjioermnvoieroeigboenob"
+		+ "Host: www.bing.comv5heezhbrt6vjhnrb6tjtvn brnk7dfggvbiuiguioveruiovjhnuioerjnhvujneruijnvbiejriovjioermnvoieroeigboenob"
+		+ "Host: www.bing.comv5heezhbrt6vjhnrb6tjtvn brnk7dfggvbiuiguioveruiovjhnuioerjnhvujneruijnvbiejriovjioermnvoieroeigboenob"
+		+ "Host: www.bing.comv5heezhbrt6vjhnrb6tjtvn brnk7dfggvbiuiguioveruiovjhnuioerjnhvujneruijnvbiejriovjioermnvoieroeigboenob"
+		+ "Host: www.bing.comv5heezhbrt6vjhnrb6tjtvn brnk7dfggvbiuiguioveruiovjhnuioerjnhvujneruijnvbiejriovjioermnvoieroeigboenob"
+		+ "Host: www.bing.comv5heezhbrt6vjhnrb6tjtvn brnk7dfggvbiuiguioveruiovjhnuioerjnhvujneruijnvbiejriovjioermnvoieroeigboenob"
+		+ "Host: www.bing.comv5heezhbrt6vjhnrb6tjtvn brnk7dfggvbiuiguioveruiovjhnuioerjnhvujneruijnvbiejriovjioermnvoieroeigboenob"
+		+ "Host: www.bing.comv5heezhbrt6vjhnrb6tjtvn brnk7dfggvbiuiguioveruiovjhnuioerjnhvujneruijnvbiejriovjioermnvoieroeigboenob"
+		+ "Host: www.bing.comv5heezhbrt6vjhnrb6tjtvn brnk7dfggvbiuiguioveruiovjhnuioerjnhvujneruijnvbiejriovjioermnvoieroeigboenob"
+		+ "Host: www.bing.comv5heezhbrt6vjhnrb6tjtvn brnk7dfggvbiuiguioveruiovjhnuioerjnhvujneruijnvbiejriovjioermnvoieroeigboenob"
+		+ "Host: www.bing.comv5heezhbrt6vjhnrb6tjtvn brnk7dfggvbiuiguioveruiovjhnuioerjnhvujneruijnvbiejriovjioermnvoieroeigboenob"
+		+ "Host: www.bing.comv5heezhbrt6vjhnrb6tjtvn brnk7dfggvbiuiguioveruiovjhnuioerjnhvujneruijnvbiejriovjioermnvoieroeigboenob"
+		+ "Host: www.bing.comv5heezhbrt6vjhnrb6tjtvn brnk7dfggvbiuiguioveruiovjhnuioerjnhvujneruijnvbiejriovjioermnvoieroeigboenob"
+		+ "Host: www.bing.comv5heezhbrt6vjhnrb6tjtvn brnk7dfggvbiuiguioveruiovjhnuioerjnhvujneruijnvbiejriovjioermnvoieroeigboenob"
+		+ "Host: www.bing.comv5heezhbrt6vjhnrb6tjtvn brnk7dfggvbiuiguioveruiovjhnuioerjnhvujneruijnvbiejriovjioermnvoieroeigboenob"
+		+ "Host: www.bing.comv5heezhbrt6vjhnrb6tjtvn brnk7dfggvbiuiguioveruiovjhnuioerjnhvujneruijnvbiejriovjioermnvoieroeigboenob"
+		+ "Host: www.bing.comv5heezhbrt6vjhnrb6tjtvn brnk7dfggvbiuiguioveruiovjhnuioerjnhvujneruijnvbiejriovjioermnvoieroeigboenob"
+		+ "Host: www.bing.comv5heezhbrt6vjhnrb6tjtvn brnk7dfggvbiuiguioveruiovjhnuioerjnhvujneruijnvbiejriovjioermnvoieroeigboenob"
+		+ "Host: www.bing.comv5heezhbrt6vjhnrb6tjtvn brnk7dfggvbiuiguioveruiovjhnuioerjnhvujneruijnvbiejriovjioermnvoieroeigboenob"
+		+ "Host: www.bing.comv5heezhbrt6vjhnrb6tjtvn brnk7dfggvbiuiguioveruiovjhnuioerjnhvujneruijnvbiejriovjioermnvoieroeigboenob"
 		
++ "Host: www.bing.comv5heezhbrt6vjhnrb6tjtvn brnk7dfggvbiuiguioveruiovjhnuioerjnhvujneruijnvbiejriovjioermnvoieroeigboenob"
++ "Host: www.bing.comv5heezhbrt6vjhnrb6tjtvn brnk7dfggvbiuiguioveruiovjhnuioerjnhvujneruijnvbiejriovjioermnvoieroeigboenob"
++ "Host: www.bing.comv5heezhbrt6vjhnrb6tjtvn brnk7dfggvbiuiguioveruiovjhnuioerjnhvujneruijnvbiejriovjioermnvoieroeigboenob"
++ "Host: www.bing.comv5heezhbrt6vjhnrb6tjtvn brnk7dfggvbiuiguioveruiovjhnuioerjnhvujneruijnvbiejriovjioermnvoieroeigboenob"
++ "Host: www.bing.comv5heezhbrt6vjhnrb6tjtvn brnk7dfggvbiuiguioveruiovjhnuioerjnhvujneruijnvbiejriovjioermnvoieroeigboenob";
+
+		byte[] a = c.getBytes(Charset.defaultCharset());
+		
+		start_time = System.nanoTime();
+		byte[] content = Base64.encodeBase64(a);
+		end_time = System.nanoTime();
+		System.out.println("lasts in ms: " + (end_time - start_time) / 1e6);
+		/*
 		String s = "KEY 127.0.0.1:11777";
 		
 		start_time = System.nanoTime();
@@ -100,7 +154,7 @@ public class TestPEASProtocol {
 		System.out.println();
 		System.out.println();
 		
-		*/
+		
 		
 		// test json approach against own protocol scheme
 		String jsonkey = "{\"command\":\"KEY\", \"issuer\":\"127.0.0.1:11777\"}";
@@ -136,7 +190,7 @@ public class TestPEASProtocol {
 		System.out.println();
 		System.out.println();
 
-		
+		*/
 	}
 	
 	private static PEASHeader PEASHeaderFromJSONObject(JSONObject obj) {

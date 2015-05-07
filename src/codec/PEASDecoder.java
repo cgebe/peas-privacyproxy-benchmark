@@ -2,7 +2,10 @@ package codec;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPipeline;
+import io.netty.handler.codec.FixedLengthFrameDecoder;
 import io.netty.handler.codec.MessageToMessageDecoder;
 
 import java.nio.charset.Charset;
@@ -29,6 +32,7 @@ public class PEASDecoder extends MessageToMessageDecoder<ByteBuf> {
 	private PEASBody body;
 	
 	private Pattern p;
+	private ChannelHandler removed;
 	
 	public PEASDecoder() {
         this(Charset.defaultCharset());
@@ -43,11 +47,13 @@ public class PEASDecoder extends MessageToMessageDecoder<ByteBuf> {
         this.firstLine = true;
         this.header = new PEASHeader();
         this.p = Pattern.compile("\\s+");
+        this.removed = null;
     }
 	
 	@Override
 	protected void decode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) throws Exception {
 		if (!writeBody) {
+			System.out.println(msg.toString(charset));
 			if (firstLine) {
 				String line = msg.toString(charset);
 				String[] values = p.split(line);
@@ -61,6 +67,8 @@ public class PEASDecoder extends MessageToMessageDecoder<ByteBuf> {
 				
 				// reading header is finished
 				if (headerField.equals("")) {
+					ctx.pipeline().remove("framedecoder");
+					//removed = ctx.pipeline().replace("framedecoder", "lframedecoder", new FixedLengthFrameDecoder(1));
 					writeBody = true;
 					body = new PEASBody(header.getBodyLength());
 				}
@@ -84,25 +92,31 @@ public class PEASDecoder extends MessageToMessageDecoder<ByteBuf> {
 				}
 			}
 		} else {
+			System.out.println("write body");
 			if (header.getBodyLength() <= 0) {
 				if (header.getCommand().equals("KEY") || header.getCommand().equals("QUERY")) {
 					out.add(new PEASRequest(header, body));
 				} else {
 					out.add(new PEASResponse(header, body));
 				}
+				// add decoder again
+				//ctx.pipeline().replace("lframedecoder", "framedecoder", removed);
 				writeIndex = 0;
 				writeBody = false;
 				this.header = new PEASHeader();
 			} else {
 				writeIndex += msg.capacity();
 				body.getBody().writeBytes(msg);
-				
+				System.out.println(msg.capacity());
+				System.out.println(writeIndex);
 				if (writeIndex + 1 >= header.getBodyLength()) {
 					if (header.getCommand().equals("QUERY")) {
 						out.add(new PEASRequest(header, body));
 					} else {
 						out.add(new PEASResponse(header, body));
 					}
+					// add decoder again
+					//ctx.pipeline().replace("lframedecoder", "framedecoder", removed);
 					writeIndex = 0;
 					writeBody = false;
 					this.header = new PEASHeader();
