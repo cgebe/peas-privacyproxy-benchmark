@@ -41,12 +41,10 @@ public class ForwardHandler extends SimpleChannelInboundHandler<PEASObject> {
             @Override
             public void operationComplete(ChannelFuture future) {
                 if (future.isSuccess()) {
-                    // connection complete start to read first data
-                	//outboundChannel.writeAndFlush(obj);
                 	System.out.println("connected to issuer");
                 } else {
                 	// TODO: normally send peas response with status code that issuer is not available
-                	
+
                     // Close the connection if the connection attempt has failed.
                 	System.out.println("not connected to issuer");
                     inboundChannel.close();

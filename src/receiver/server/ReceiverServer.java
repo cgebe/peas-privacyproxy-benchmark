@@ -23,24 +23,22 @@ public class ReceiverServer {
     }
 
     public void run() throws Exception {
-        EventLoopGroup bossGroup = new NioEventLoopGroup(1); // (1)
+        EventLoopGroup bossGroup = new NioEventLoopGroup(1);
         EventLoopGroup workerGroup = new NioEventLoopGroup(3);
         try {
-            ServerBootstrap b = new ServerBootstrap(); // (2)
+            ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup)
-             .channel(NioServerSocketChannel.class) // (3)
+             .channel(NioServerSocketChannel.class)
              .handler(new LoggingHandler(LogLevel.INFO))
              .childHandler(new ReceiverChannelInitializer());
-             //.option(ChannelOption.SO_BACKLOG, 128);        // (5)
+             //.option(ChannelOption.SO_BACKLOG, 128);        
              //.childOption(ChannelOption.AUTO_READ, true)
-             //.childOption(ChannelOption.SO_KEEPALIVE, true); // (6)
+             //.childOption(ChannelOption.SO_KEEPALIVE, true); 
 
             // Bind and start to accept incoming connections.
-            ChannelFuture f = b.bind(port).sync(); // (7)
+            ChannelFuture f = b.bind(port).sync(); 
 
             // Wait until the server socket is closed.
-            // In this example, this does not happen, but you can do that to gracefully
-            // shut down your server.
             f.channel().closeFuture().sync();
         } finally {
             workerGroup.shutdownGracefully();

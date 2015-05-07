@@ -34,17 +34,10 @@ public class ForwardChannelInitializer extends ChannelInitializer<SocketChannel>
 	protected void initChannel(SocketChannel ch) throws Exception {
 		pipeline = ch.pipeline();
 		pipeline.addLast(new LoggingHandler(LogLevel.INFO));
-		//pipeline.addLast(new DelimiterBasedFrameDecoder(8192, Delimiters.lineDelimiter()));
-		//pipeline.addLast("framedecoder", new DelimiterBasedFrameDecoder(8192, Delimiters.lineDelimiter()));
-		//pipeline.addLast("framedecoder", new LineBasedFrameDecoder(120));
-        //pipeline.addLast("stringdecoder", new StringDecoder());
-        //pipeline.addLast("stringencoder", new StringEncoder());
-        //pipeline.addLast("jsondecoder", new JSONDecoder());
-        //pipeline.addLast("jsonencoder", new JSONEncoder());
-        pipeline.addLast("peasdecoder", new PEASDecoder3());
-        pipeline.addLast("peasencoder", new PEASEncoder());
-        pipeline.addLast("peasprinter", new PEASPrinter());
-        pipeline.addLast("returner", new ReturnHandler(inboundChannel, obj));
+        pipeline.addLast("peasdecoder", new PEASDecoder3());  // upstream 1
+        pipeline.addLast("peasencoder", new PEASEncoder()); // downstream 1
+        pipeline.addLast("peasprinter", new PEASPrinter()); // upstream 2
+        pipeline.addLast("returner", new ReturnHandler(inboundChannel, obj)); // upstream 3
 	}
 
 }

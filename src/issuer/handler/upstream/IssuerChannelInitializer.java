@@ -22,16 +22,11 @@ public class IssuerChannelInitializer extends ChannelInitializer<SocketChannel> 
 	@Override
 	protected void initChannel(SocketChannel ch) throws Exception {
 		pipeline = ch.pipeline();
-		//pipeline.addLast(new LoggingHandler(LogLevel.INFO));
-		//pipeline.addLast("framedecoder", new DelimiterBasedFrameDecoder(8192, Delimiters.lineDelimiter()));
-		//pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(120));
-        //pipeline.addLast("stringDecoder", new StringDecoder());
-        //pipeline.addLast("stringEncoder", new StringEncoder());
-		pipeline.addLast("peasdecoder", new PEASDecoder3());
-        pipeline.addLast("peasencoder", new PEASEncoder());
-        pipeline.addLast("peasprinter", new PEASPrinter());
-        pipeline.addLast("keyhandler", new KeyHandler());
-        pipeline.addLast("queryhandler", new QueryHandler());
+		pipeline.addLast("peasdecoder", new PEASDecoder3()); // upstream 1
+        pipeline.addLast("peasencoder", new PEASEncoder()); // downstream 1
+        pipeline.addLast("peasprinter", new PEASPrinter()); // upstream 2
+        pipeline.addLast("keyhandler", new KeyHandler()); // upstream 3
+        pipeline.addLast("queryhandler", new QueryHandler()); // upstream 4
         // TODO
         //pipeline.addLast("decrypter", new DecryptHandler());
         //pipeline.addLast("encrypter", new EncryptHandler());

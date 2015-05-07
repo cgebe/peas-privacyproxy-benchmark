@@ -1,7 +1,6 @@
 package receiver.handler.forward.upstream;
 
 import protocol.PEASObject;
-import util.Message;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
@@ -24,13 +23,9 @@ public class ReturnHandler extends SimpleChannelInboundHandler<PEASObject> {
         f.addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture future) {
-            	//future.channel().close();
                 if (future.isSuccess()) {
-                	//future.channel().writeAndFlush(msg);
                 	System.out.println("successful forward");
-                    // ctx.channel().read();
                 } else {
-                    //future.channel().close();
                     System.out.println("failed forward");
                 }
             }
@@ -41,7 +36,6 @@ public class ReturnHandler extends SimpleChannelInboundHandler<PEASObject> {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         cause.printStackTrace();
-        //ForwardHandler.closeOnFlush(ctx.channel());
     }
 
 	@Override
@@ -54,7 +48,6 @@ public class ReturnHandler extends SimpleChannelInboundHandler<PEASObject> {
             	future.channel().close();
                 if (future.isSuccess()) {
                 	System.out.println("successful return");
-                   // ctx.channel().read();
                 } else {
                 	System.out.println("failed return");
                     future.channel().close();

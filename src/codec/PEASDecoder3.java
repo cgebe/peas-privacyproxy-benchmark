@@ -2,18 +2,14 @@ package codec;
 
 import java.nio.charset.Charset;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import protocol.PEASBody;
 import protocol.PEASHeader;
 import protocol.PEASMessage;
-import protocol.PEASObject;
-import protocol.PEASRequest;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufProcessor;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
-import io.netty.handler.codec.ReplayingDecoder;
 import io.netty.handler.codec.TooLongFrameException;
 import io.netty.handler.codec.http.HttpConstants;
 import io.netty.util.internal.AppendableCharSequence;
@@ -22,12 +18,8 @@ import io.netty.util.internal.AppendableCharSequence;
 public class PEASDecoder3 extends ByteToMessageDecoder {
 	private static final String EMPTY_VALUE = "";
 	
-	private final Charset charset;
-	
 	private PEASHeader header;
 	private PEASBody body;
-	
-	private Pattern p;
 	
 	private State currentState = State.READ_INITIAL;
 
@@ -41,8 +33,6 @@ public class PEASDecoder3 extends ByteToMessageDecoder {
 	private HeaderParser headerParser;
 
 	private long chunkSize;
-
-	private boolean resetRequested;
 	
 	private enum State {
 		READ_INITIAL,
@@ -79,8 +69,6 @@ public class PEASDecoder3 extends ByteToMessageDecoder {
                     maxContentSize);
         }
         this.maxContentSize = maxContentSize;
-    	this.charset = charset;
-        this.p = Pattern.compile("\\s+");
         AppendableCharSequence seq = new AppendableCharSequence(128);
         lineParser = new LineParser(seq, maxInitialLineLength);
         headerParser = new HeaderParser(seq, maxHeaderSize);
@@ -126,7 +114,7 @@ public class PEASDecoder3 extends ByteToMessageDecoder {
             assert nextState == State.READ_CONTENT;
 
             if (nextState == State.READ_CONTENT) {
-                // chunkSize will be decreased as the READ_FIXED_LENGTH_CONTENT state reads data chunk by chunk.
+                // chunkSize will be decreased as the READ_CONTENT state reads data chunk by chunk.
                 chunkSize = contentLength;
             }
             
@@ -141,11 +129,10 @@ public class PEASDecoder3 extends ByteToMessageDecoder {
 	    case READ_CONTENT: {
 	        int readLimit = buffer.readableBytes();
 	        // Check if the buffer is readable first as we use the readable byte count
-	        // to create the HttpChunk. This is needed as otherwise we may end up with
-	        // create a HttpChunk instance that contains an empty buffer and so is
-	        // handled like it is the last HttpChunk.
-	        //
-	        // See https://github.com/netty/netty/issues/433
+	        // to write the PEASBody. This is needed as otherwise we may end up with
+	        // create a Body instance that contains an empty buffer and so is
+	        // handled like it is the last one.
+
 	        if (readLimit == 0) {
 	            return;
 	        }
@@ -172,14 +159,6 @@ public class PEASDecoder3 extends ByteToMessageDecoder {
 	    }
 	}
 
-    /**
-     * Resets the state of the decoder so that it is ready to decode a new message.
-     * This method is useful for handling a rejected request with {@code Expect: 100-continue} header.
-     */
-    public void reset() {
-        resetRequested = true;
-    }
-
     private void resetNow() {
         currentState = State.READ_INITIAL;
     }
@@ -192,32 +171,6 @@ public class PEASDecoder3 extends ByteToMessageDecoder {
         in.skipBytes(in.readableBytes());
 
         return new PEASHeader();
-    }
-
-    private PEASBody invalidChunk(ByteBuf in, Exception cause) {
-        currentState = State.BAD_MESSAGE;
-
-        // Advance the readerIndex so that ByteToMessageDecoder does not complain
-        // when we produced an invalid message without consuming anything.
-        in.skipBytes(in.readableBytes());
-
-        return new PEASBody(0);
-    }
-
-    private static boolean skipControlCharacters(ByteBuf buffer) {
-        boolean skiped = false;
-        final int wIdx = buffer.writerIndex();
-        int rIdx = buffer.readerIndex();
-        while (wIdx > rIdx) {
-            int c = buffer.getUnsignedByte(rIdx++);
-            if (!Character.isISOControl(c) && !Character.isWhitespace(c)) {
-                rIdx--;
-                skiped = true;
-                break;
-            }
-        }
-        buffer.readerIndex(rIdx);
-        return skiped;
     }
 
     private State readHeaders(ByteBuf buffer) {
@@ -273,26 +226,11 @@ public class PEASDecoder3 extends ByteToMessageDecoder {
         	if (name.toString().equals("Query")) {
         		this.header.setQuery(value.toString());
         	}
-            //headers.add(name, value);
         }
         // reset name and value fields
         name = null;
         value = null;
 
-        /*
-        State nextState;
-
-        if (isContentAlwaysEmpty(message)) {
-            HttpHeaderUtil.setTransferEncodingChunked(message, false);
-            nextState = State.SKIP_CONTROL_CHARS;
-        } else if (HttpHeaderUtil.isTransferEncodingChunked(message)) {
-            nextState = State.READ_CHUNK_SIZE;
-        } else if (contentLength() >= 0) {
-            nextState = State.READ_FIXED_LENGTH_CONTENT;
-        } else {
-            nextState = State.READ_VARIABLE_LENGTH_CONTENT;
-        }
-        */
         return State.READ_CONTENT;
     }
 
@@ -302,20 +240,6 @@ public class PEASDecoder3 extends ByteToMessageDecoder {
         }
         return contentLength;
     }
-
-    private static int getChunkSize(String hex) {
-        hex = hex.trim();
-        for (int i = 0; i < hex.length(); i ++) {
-            char c = hex.charAt(i);
-            if (c == ';' || Character.isWhitespace(c) || Character.isISOControl(c)) {
-                hex = hex.substring(0, i);
-                break;
-            }
-        }
-
-        return Integer.parseInt(hex, 16);
-    }
-	
 
     private static String[] splitInitialLine(AppendableCharSequence sb) {
         int aStart;

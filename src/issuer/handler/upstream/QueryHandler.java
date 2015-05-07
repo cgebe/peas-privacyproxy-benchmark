@@ -17,7 +17,7 @@ public class QueryHandler extends SimpleChannelInboundHandler<PEASObject> {
 	@Override
 	protected void channelRead0(ChannelHandlerContext arg0, PEASObject obj) throws Exception {
 		if (obj.getHeader().getCommand().equals("QUERY")) {
-			System.out.println("query received2");
+			System.out.println("query received");
 			// TODO: decrypt query field and body, and dispatch http or forward to another issuer
 		}
 	}

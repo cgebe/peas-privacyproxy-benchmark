@@ -25,9 +25,10 @@ public class KeyHandler extends SimpleChannelInboundHandler<PEASObject> {
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, PEASObject obj) throws Exception {
 		if (obj.getHeader().getCommand().equals("KEY")) {
-			// TODO: write own rsa key on downstream and send back to receiver/client
+
             byte[] keyBytes = Files.readAllBytes(Paths.get(".").resolve("pubKey2.der"));
             
+            // construct key response
             PEASHeader header = new PEASHeader();
             header.setCommand("RESPONSE");
             header.setIssuer(obj.getHeader().getIssuer());
@@ -39,24 +40,21 @@ public class KeyHandler extends SimpleChannelInboundHandler<PEASObject> {
             
             PEASResponse res = new PEASResponse(header, body);
             
+            // send reponse back
             ChannelFuture f = ctx.writeAndFlush(res);
             
             f.addListener(new ChannelFutureListener() {
                 @Override
                 public void operationComplete(ChannelFuture future) {
-                	//future.channel().close();
                     if (future.isSuccess()) {
-                    	//future.channel().writeAndFlush(msg);
                     	System.out.println("return key successful");
-                        // ctx.channel().read();
                     } else {
-                        //future.channel().close();
                         System.out.println("return key failed");
                         future.channel().close();
                     }
                 }
             });
-            //AsymmetricKeyParameter key = PublicKeyFactory.createKey(keyBytes);
+
 		} else {
 			ctx.fireChannelRead(obj);
 		}
