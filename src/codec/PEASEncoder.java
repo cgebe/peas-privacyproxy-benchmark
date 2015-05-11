@@ -33,7 +33,13 @@ public class PEASEncoder extends MessageToByteEncoder<PEASObject>{
         }
         this.charset = charset;
     }
-
+    
+    /*
+    @Override
+    protected ByteBuf allocateBuffer(ChannelHandlerContext ctx, PEASObject obj, boolean preferDirect) {
+        return ctx.alloc().directBuffer(8192 + 8192 + 4096);
+    }
+     */
 
 	@Override
 	protected void encode(ChannelHandlerContext ctx, PEASObject obj, ByteBuf out) throws Exception {

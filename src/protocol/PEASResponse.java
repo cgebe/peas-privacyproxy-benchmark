@@ -1,11 +1,17 @@
 package protocol;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.json.simple.JSONValue;
 
-public class PEASResponse extends PEASObject {
+public class PEASResponse extends PEASObject implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6104923001549566362L;
 
 	public PEASResponse(PEASHeader header, PEASBody body) {
 		this.header = header;

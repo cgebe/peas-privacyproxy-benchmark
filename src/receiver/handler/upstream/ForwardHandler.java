@@ -27,7 +27,7 @@ public class ForwardHandler extends SimpleChannelInboundHandler<PEASObject> {
 
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, PEASObject obj) throws Exception {
-		final Channel inboundChannel = ctx.channel();
+		Channel inboundChannel = ctx.channel();
 
         // Start the connection attempt.
         Bootstrap b = new Bootstrap();
@@ -59,7 +59,5 @@ public class ForwardHandler extends SimpleChannelInboundHandler<PEASObject> {
         cause.printStackTrace();
         //closeOnFlush(ctx.channel());
     }
-
-
 
 }

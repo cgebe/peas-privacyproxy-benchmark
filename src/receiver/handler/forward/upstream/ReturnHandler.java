@@ -41,11 +41,9 @@ public class ReturnHandler extends SimpleChannelInboundHandler<PEASObject> {
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, PEASObject toReturn) throws Exception {
         ChannelFuture f = inboundChannel.writeAndFlush(toReturn);
-        
         f.addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture future) {
-            	future.channel().close();
                 if (future.isSuccess()) {
                 	System.out.println("successful return");
                 } else {
@@ -54,7 +52,6 @@ public class ReturnHandler extends SimpleChannelInboundHandler<PEASObject> {
                 }
             }
         });
-        
 	}
 
 
