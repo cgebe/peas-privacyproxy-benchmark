@@ -10,6 +10,14 @@ public class PEASBody {
 	public PEASBody(int length) {
 		body = Unpooled.buffer(length);
 	}
+	
+	public PEASBody(ByteBuf body) {
+		this.body = body;
+	}
+	
+	public PEASBody(byte[] body) {
+		this.body = Unpooled.wrappedBuffer(body);
+	}
 
 	public ByteBuf getBody() {
 		return body;

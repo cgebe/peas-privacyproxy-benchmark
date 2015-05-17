@@ -1,8 +1,7 @@
-/discardTest/
-/issuer/
-/reciever/
+/onionrouter/
 /util/
-/codec/
-/receiver/
-/objectecho/
 /protocol/
+/onion/
+/receiver/
+/issuer/
+/codec/

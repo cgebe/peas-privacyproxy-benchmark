@@ -1,5 +1,20 @@
-package onionrouter.node;
+package onion.node;
 
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.KeyFactory;
+import java.security.PrivateKey;
+
+import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
+
+import onion.node.upstream.NodeChannelInitializer;
+
+import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
+import org.bouncycastle.crypto.util.PrivateKeyFactory;
+import org.bouncycastle.crypto.util.PublicKeyFactory;
 
 import receiver.handler.upstream.ReceiverChannelInitializer;
 import util.Config;
@@ -18,9 +33,16 @@ import io.netty.handler.logging.LoggingHandler;
 public class Node {
 
     private int port;
+	private KeyFactory DH_KeyFac;
+	private IvParameterSpec iv;
+	private AsymmetricKeyParameter privateKey;
 
-    public Node(int port) {
+    public Node(int port) throws IOException {
         this.port = port;
+        
+		byte[] keyBytes = Files.readAllBytes(Paths.get(".").resolve("privKey2.der"));
+		privateKey  = PrivateKeyFactory.createKey(keyBytes);
+
     }
 
     public void run() throws Exception {
@@ -31,7 +53,7 @@ public class Node {
             b.group(bossGroup, workerGroup)
              .channel(NioServerSocketChannel.class)
              .handler(new LoggingHandler(LogLevel.INFO))
-             .childHandler(new NodeChannelInitializer());
+             .childHandler(new NodeChannelInitializer(privateKey));
              //.option(ChannelOption.SO_BACKLOG, 128);        
              //.childOption(ChannelOption.AUTO_READ, true)
              //.childOption(ChannelOption.SO_KEEPALIVE, true); 
@@ -49,6 +71,6 @@ public class Node {
 
     public static void main(String[] args) throws Exception {
         //new RecieverServer(Integer.parseInt(Config.getInstance().getValue("port"))).run();
-    	new Node(10777).run();
+    	new Node(12345).run();
     }
 }

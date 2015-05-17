@@ -13,10 +13,12 @@ public class PEASHeader {
 	private String protocol;
 	private String status;
 	private int bodyLength;
+	private String forward;
 	
 	public PEASHeader() {
 		command = null;
 		query = null;
+		forward = null;
 		issuer = null;
 		protocol = null;
 		status = null;
@@ -140,6 +142,14 @@ public class PEASHeader {
 
 	public void setBodyLength(int bodyLength) {
 		this.bodyLength = bodyLength;
+	}
+
+	public String getForward() {
+		return forward;
+	}
+
+	public void setForward(String forward) {
+		this.forward = forward;
 	}
 
 }
