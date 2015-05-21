@@ -9,6 +9,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import protocol.PEASBody;
 import protocol.PEASObject;
+import util.Encryption;
 
 public class ReturnHandler extends SimpleChannelInboundHandler<PEASObject> {
 
@@ -45,7 +46,11 @@ public class ReturnHandler extends SimpleChannelInboundHandler<PEASObject> {
 
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, PEASObject toReturn) throws Exception {
-		byte[] enc = cipher.doFinal(obj.getBody().getBody().array());
+		toReturn.getHeader().setIssuer(obj.getHeader().getIssuer());
+		// encrypt the return msg
+		byte[] enc = cipher.doFinal(toReturn.getBody().getBody().array());
+		// set new bodylength
+		toReturn.getHeader().setBodyLength(enc.length);
 		PEASBody body = new PEASBody(enc);
 		toReturn.setBody(body);
 		

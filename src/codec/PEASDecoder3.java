@@ -160,6 +160,13 @@ public class PEASDecoder3 extends ByteToMessageDecoder {
 	}
 
     private void resetNow() {
+    	this.header = null;
+    	this.body = null;
+    	name = null;
+        value = null;
+        contentLength = Long.MIN_VALUE;
+        lineParser.reset();
+        headerParser.reset();
         currentState = State.READ_INITIAL;
     }
 
@@ -192,6 +199,9 @@ public class PEASDecoder3 extends ByteToMessageDecoder {
                     	if (name.toString().equals("Status")) {
                     		this.header.setStatus(value.toString());
                     	}
+                    	if (name.toString().equals("Forward")) {
+                    		this.header.setForward(value.toString());
+                    	}
                     	if (name.toString().equals("Protocol")) {
                     		this.header.setProtocol(value.toString());
                     	}
@@ -216,6 +226,9 @@ public class PEASDecoder3 extends ByteToMessageDecoder {
         if (name != null) {
         	if (name.toString().equals("Status")) {
         		this.header.setStatus(value.toString());
+        	}
+        	if (name.toString().equals("Forward")) {
+        		this.header.setForward(value.toString());
         	}
         	if (name.toString().equals("Protocol")) {
         		this.header.setProtocol(value.toString());

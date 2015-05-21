@@ -9,7 +9,9 @@ import org.apache.commons.codec.binary.Base64;
 import protocol.PEASBody;
 import protocol.PEASHeader;
 import protocol.PEASObject;
+import protocol.PEASRequest;
 import protocol.PEASResponse;
+import util.Encryption;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
@@ -31,7 +33,7 @@ public class HandshakeForwardHandler extends SimpleChannelInboundHandler<PEASObj
 	protected void channelRead0(ChannelHandlerContext ctx, PEASObject obj) throws Exception {
 		if (obj.getHeader().getCommand().equals("HANDSHAKE")) {
 			if (obj.getHeader().getForward() != null) {
-				
+
 				String[] forward = new String(initializer.getAESdecipher().doFinal(Base64.decodeBase64(obj.getHeader().getForward()))).split("_");
 				
 				PEASHeader header = new PEASHeader();
@@ -44,11 +46,14 @@ public class HandshakeForwardHandler extends SimpleChannelInboundHandler<PEASObj
 				
 				header.setCommand("HANDSHAKE");
 				header.setIssuer(forward[0]);
+				header.setStatus("300");
 				
 				String[] address = forward[0].split(":");
 				
 				// body of forwarded msg
 				byte[] dec = initializer.getAESdecipher().doFinal(obj.getBody().getBody().array());
+				header.setBodyLength(dec.length);
+				PEASBody body = new PEASBody(dec);
 				
 				// open new socket to next node address[0] = hostname, address[1] = port
 				Channel inboundChannel = ctx.channel();
@@ -57,7 +62,7 @@ public class HandshakeForwardHandler extends SimpleChannelInboundHandler<PEASObj
 		        Bootstrap b = new Bootstrap();
 		        b.group(inboundChannel.eventLoop())
 		         .channel(ctx.channel().getClass())
-		         .handler(new ForwardChannelInitializer(inboundChannel, obj, initializer.getAEScipher()));
+		         .handler(new ForwardChannelInitializer(inboundChannel, new PEASRequest(header, body), initializer.getAEScipher()));
 		        
 		        ChannelFuture f = b.connect(address[0], Integer.parseInt(address[1]));
 		       
@@ -65,17 +70,21 @@ public class HandshakeForwardHandler extends SimpleChannelInboundHandler<PEASObj
 		            @Override
 		            public void operationComplete(ChannelFuture future) {
 		                if (future.isSuccess()) {
-		                	System.out.println("connected to issuer");
+		                	System.out.println("connected to next node");
 		                } else {
 		                	// TODO: normally send peas response with status code that issuer is not available
 
 		                    // Close the connection if the connection attempt has failed.
-		                	System.out.println("not connected to issuer");
+		                	System.out.println("not connected to next node");
 		                    inboundChannel.close();
 		                }
 		            }
 		        });
+			} else {
+				ctx.fireChannelRead(obj);
 			}
+		} else {
+			ctx.fireChannelRead(obj);
 		}
 	}
 	

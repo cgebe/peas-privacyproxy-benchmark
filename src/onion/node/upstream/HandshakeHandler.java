@@ -59,7 +59,6 @@ public class HandshakeHandler extends SimpleChannelInboundHandler<PEASObject> {
 
 	            // Compute DH Key Aggreement and save the result in msg
 	            ByteBuf key = dhKeyAggreement(decrypted);
-
 	            
 	            PEASHeader header = new PEASHeader();
 	            header.setCommand("RESPONSE");
@@ -86,8 +85,11 @@ public class HandshakeHandler extends SimpleChannelInboundHandler<PEASObject> {
 	                    }
 	                }
 	            });
-			}
-		        
+			} else {
+				ctx.fireChannelRead(obj);
+			}  
+		} else {
+			ctx.fireChannelRead(obj);
 		}
 
 	}
@@ -196,7 +198,7 @@ public class HandshakeHandler extends SimpleChannelInboundHandler<PEASObject> {
         KeyAgree.doPhase(clientPubKey, true);
         byte[] sharedSecret = KeyAgree.generateSecret();
         SecretKey symmetricKey = new SecretKeySpec(sharedSecret, 0, 16, "AES");
-        
+        System.out.println("skn " + Encryption.bytesToHex(symmetricKey.getEncoded()));
         // Initiate AES cipher and decipher
         Cipher AEScipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         AEScipher.init(Cipher.ENCRYPT_MODE, symmetricKey, iv);

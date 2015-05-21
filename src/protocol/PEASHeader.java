@@ -31,6 +31,12 @@ public class PEASHeader {
 		request.append(" ");
 		request.append(this.getIssuer());
 		
+		if (this.getForward() != null) {
+			request.append(System.lineSeparator());
+			request.append("Forward: ");
+			request.append(this.getForward());
+		} 
+		
 		if (this.getStatus() != null) {
 			request.append(System.lineSeparator());
 			request.append("Status: ");

@@ -17,6 +17,7 @@ public class PEASBody {
 	
 	public PEASBody(byte[] body) {
 		this.body = Unpooled.wrappedBuffer(body);
+		//this.body.writeBytes(body);
 	}
 
 	public ByteBuf getBody() {
