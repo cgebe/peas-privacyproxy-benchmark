@@ -60,7 +60,7 @@ public class PEASDecoder2 extends DelimiterBasedFrameDecoder {
 						//ctx.pipeline().remove("framedecoder");
 						//removed = ctx.pipeline().replace("framedecoder", "lframedecoder", new FixedLengthFrameDecoder(1));
 						writeBody = true;
-						body = new PEASBody(header.getBodyLength());
+						body = new PEASBody(header.getContentLength());
 					}
 					
 					String[] values = p.split(headerField);
@@ -78,14 +78,14 @@ public class PEASDecoder2 extends DelimiterBasedFrameDecoder {
 					}
 					
 					if (values[0].equals("Content-Length:")) {
-						header.setBodyLength(Integer.parseInt(values[1]));
+						header.setContentLength(Integer.parseInt(values[1]));
 					}
 				}
 			}
 			return null;
 		} else {
 			System.out.println("write body");
-			if (header.getBodyLength() <= 0) {
+			if (header.getContentLength() <= 0) {
 				if (header.getCommand().equals("KEY") || header.getCommand().equals("QUERY")) {
 					return new PEASRequest(header, body);
 				} else {
@@ -95,10 +95,10 @@ public class PEASDecoder2 extends DelimiterBasedFrameDecoder {
 				//ctx.pipeline().replace("lframedecoder", "framedecoder", removed);
 			} else {
 				writeIndex += buffer.capacity();
-				body.getBody().writeBytes(buffer);
+				body.getContent().writeBytes(buffer);
 				System.out.println(buffer.capacity());
 				System.out.println(writeIndex);
-				if (writeIndex + 1 == header.getBodyLength()) {
+				if (writeIndex + 1 == header.getContentLength()) {
 					if (header.getCommand().equals("QUERY")) {
 						return new PEASRequest(header, body);
 					} else {

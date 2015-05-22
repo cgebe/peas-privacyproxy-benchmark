@@ -48,7 +48,7 @@ public class PEASParser {
 					}
 					
 					if (values[0].equals("Content-Length:")) {
-						header.setBodyLength(Integer.parseInt(values[1]));
+						header.setContentLength(Integer.parseInt(values[1]));
 					}
 				}
 			}

@@ -36,7 +36,7 @@ public class JSONDecoder extends MessageToMessageDecoder<String> {
 			header.setCommand(c);
 			header.setIssuer((String) obj.get("issuer"));
 			header.setProtocol((String) obj.get("protocol"));
-			header.setBodyLength((int) obj.get("bodylength"));
+			header.setContentLength((int) obj.get("bodylength"));
 			header.setQuery((String) obj.get("query"));
 
 			return new PEASRequest(header, new PEASBody(0));
@@ -45,7 +45,7 @@ public class JSONDecoder extends MessageToMessageDecoder<String> {
 			header.setCommand(c);
 			header.setStatus((String) obj.get("status"));
 			header.setProtocol((String) obj.get("protocol"));
-			header.setBodyLength((int) obj.get("bodylength"));
+			header.setContentLength((int) obj.get("bodylength"));
 			
 			
 			return new PEASResponse(header, new PEASBody(0));

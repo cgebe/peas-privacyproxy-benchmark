@@ -51,18 +51,19 @@ public class HandshakeForwardHandler extends SimpleChannelInboundHandler<PEASObj
 				String[] address = forward[0].split(":");
 				
 				// body of forwarded msg
-				byte[] dec = initializer.getAESdecipher().doFinal(obj.getBody().getBody().array());
-				header.setBodyLength(dec.length);
+				byte[] dec = initializer.getAESdecipher().doFinal(obj.getBody().getContent().array());
+				header.setContentLength(dec.length);
 				PEASBody body = new PEASBody(dec);
 				
 				// open new socket to next node address[0] = hostname, address[1] = port
 				Channel inboundChannel = ctx.channel();
 
-		        // Start the connection attempt.
+				//initializer.forward(address[0], Integer.parseInt(address[1]), new PEASRequest(header, body), inboundChannel, ctx);
+				// Start the connection attempt.
 		        Bootstrap b = new Bootstrap();
 		        b.group(inboundChannel.eventLoop())
 		         .channel(ctx.channel().getClass())
-		         .handler(new ForwardChannelInitializer(inboundChannel, new PEASRequest(header, body), initializer.getAEScipher()));
+		         .handler(new ForwardChannelInitializer(inboundChannel, initializer.getAEScipher()));
 		        
 		        ChannelFuture f = b.connect(address[0], Integer.parseInt(address[1]));
 		       

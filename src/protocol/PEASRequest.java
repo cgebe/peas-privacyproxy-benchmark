@@ -23,7 +23,7 @@ public class PEASRequest extends PEASObject implements Serializable {
 		StringBuilder request = new StringBuilder();
 		
 		request.append(header.toString());
-		request.append(body.getBody().toString());
+		request.append(body.getContent().toString());
 		
 		return request.toString();
 	}
@@ -43,9 +43,9 @@ public class PEASRequest extends PEASObject implements Serializable {
 			map.put("query", header.getQuery());
 		}
 		
-		if (body.getBody() != null && header.getBodyLength() > 0) {
-			map.put("body", body.getBody().toString());
-			map.put("bodylength", String.valueOf(header.getBodyLength()));
+		if (body.getContent() != null && header.getContentLength() > 0) {
+			map.put("body", body.getContent().toString());
+			map.put("bodylength", String.valueOf(header.getContentLength()));
 		}
 		
 		return JSONValue.toJSONString(map);

@@ -70,7 +70,7 @@ public class QueryHandler extends SimpleChannelInboundHandler<PEASObject> {
 			String query = getQueryFromQueryField(obj.getHeader().getQuery());
 			System.out.println("q: " + query);
 			
-			String content = new String(Encryption.AESdecrypt(obj.getBody().getBody().array(), currentKey, iv));
+			String content = new String(Encryption.AESdecrypt(obj.getBody().getContent().array(), currentKey, iv));
 			System.out.println("c: " + content);
 			
 			// simulate search engine request#
@@ -85,7 +85,7 @@ public class QueryHandler extends SimpleChannelInboundHandler<PEASObject> {
 			new Random().nextBytes(b);
 			b = Encryption.AESencrypt(b, currentKey, iv);
 			
-			header.setBodyLength(b.length);
+			header.setContentLength(b.length);
 			PEASBody body = new PEASBody(b);
 			
 			PEASResponse res = new PEASResponse(header, body);

@@ -52,10 +52,9 @@ public class HandshakeHandler extends SimpleChannelInboundHandler<PEASObject> {
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, PEASObject obj) throws Exception {
 		if (obj.getHeader().getCommand().equals("HANDSHAKE")) {
-			// TODO: check if forward or adresses to this
 			if (obj.getHeader().getForward() == null) {
 	            // Decrypt the payload in output
-				ByteBuf decrypted = decryptHandshake(obj.getBody().getBody());
+				ByteBuf decrypted = decryptHandshake(obj.getBody().getContent());
 
 	            // Compute DH Key Aggreement and save the result in msg
 	            ByteBuf key = dhKeyAggreement(decrypted);
@@ -66,7 +65,7 @@ public class HandshakeHandler extends SimpleChannelInboundHandler<PEASObject> {
 	            header.setStatus("100");
 	            
 	            //byte[] encKey = initializer.getAEScipher().doFinal(key.array());
-	            header.setBodyLength(key.capacity());
+	            header.setContentLength(key.capacity());
 	            
 	            PEASBody body = new PEASBody(key);
 	            

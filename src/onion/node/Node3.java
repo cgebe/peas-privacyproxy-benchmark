@@ -50,7 +50,6 @@ public class Node3 {
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup)
              .channel(NioServerSocketChannel.class)
-             .handler(new LoggingHandler(LogLevel.INFO))
              .childHandler(new NodeChannelInitializer(privateKey));
              //.option(ChannelOption.SO_BACKLOG, 128);        
              //.childOption(ChannelOption.AUTO_READ, true)

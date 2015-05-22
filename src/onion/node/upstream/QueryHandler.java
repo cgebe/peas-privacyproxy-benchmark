@@ -35,7 +35,7 @@ public class QueryHandler extends SimpleChannelInboundHandler<PEASObject> {
 				header.setProtocol("HTTP");
 				
 				// body of forwarded msg
-				byte[] content = initializer.getAESdecipher().doFinal(obj.getBody().getBody().array());
+				byte[] content = initializer.getAESdecipher().doFinal(obj.getBody().getContent().array());
 				System.out.println("c: " + new String(content));
 				
 				// simulating request to search engine here

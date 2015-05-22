@@ -5,27 +5,27 @@ import io.netty.buffer.Unpooled;
 
 public class PEASBody {
 	
-	private ByteBuf body;
+	private ByteBuf content;
 	
 	public PEASBody(int length) {
-		body = Unpooled.buffer(length);
+		content = Unpooled.buffer(length);
 	}
 	
 	public PEASBody(ByteBuf body) {
-		this.body = body;
+		this.content = body;
 	}
 	
 	public PEASBody(byte[] body) {
-		this.body = Unpooled.wrappedBuffer(body);
+		this.content = Unpooled.wrappedBuffer(body);
 		//this.body.writeBytes(body);
 	}
 
-	public ByteBuf getBody() {
-		return body;
+	public ByteBuf getContent() {
+		return content;
 	}
 
-	public void setBody(ByteBuf body) {
-		this.body = body;
+	public void setContent(ByteBuf content) {
+		this.content = content;
 	}
 
 }

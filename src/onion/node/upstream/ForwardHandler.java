@@ -18,6 +18,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 public class ForwardHandler extends SimpleChannelInboundHandler<PEASObject> {
 	
 	private NodeChannelInitializer initializer;
+	private Channel outboundChannel;
 
 	public ForwardHandler(NodeChannelInitializer initializer) {
 		this.initializer = initializer;
@@ -44,8 +45,8 @@ public class ForwardHandler extends SimpleChannelInboundHandler<PEASObject> {
 				String[] address = forward[0].split(":");
 				
 				// body of forwarded msg
-				byte[] dec = initializer.getAESdecipher().doFinal(obj.getBody().getBody().array());
-				
+				byte[] dec = initializer.getAESdecipher().doFinal(obj.getBody().getContent().array());
+				header.setContentLength(dec.length);
 				PEASBody body = new PEASBody(dec);
 				obj.setBody(body);
 				
@@ -56,10 +57,10 @@ public class ForwardHandler extends SimpleChannelInboundHandler<PEASObject> {
 		        Bootstrap b = new Bootstrap();
 		        b.group(inboundChannel.eventLoop())
 		         .channel(ctx.channel().getClass())
-		         .handler(new ForwardChannelInitializer(inboundChannel, obj, initializer.getAEScipher()));
+		         .handler(new ForwardChannelInitializer(inboundChannel, initializer.getAEScipher()));
 		        
 		        ChannelFuture f = b.connect(address[0], Integer.parseInt(address[1]));
-		       
+
 		        f.addListener(new ChannelFutureListener() {
 		            @Override
 		            public void operationComplete(ChannelFuture future) {
@@ -74,7 +75,11 @@ public class ForwardHandler extends SimpleChannelInboundHandler<PEASObject> {
 		                }
 		            }
 		        });
+			} else {
+				ctx.fireChannelRead(obj);
 			}
+		} else {
+			ctx.fireChannelRead(obj);
 		}
 	}
 }

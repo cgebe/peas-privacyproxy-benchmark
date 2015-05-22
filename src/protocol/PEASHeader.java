@@ -12,7 +12,7 @@ public class PEASHeader {
 	private String issuer;
 	private String protocol;
 	private String status;
-	private int bodyLength;
+	private int contentLength;
 	private String forward;
 	
 	public PEASHeader() {
@@ -49,10 +49,10 @@ public class PEASHeader {
 			request.append(this.getProtocol());
 		} 
 		
-		if (this.getBodyLength() > 0) {
+		if (this.getContentLength() > 0) {
 			request.append(System.lineSeparator());
 			request.append("Content-Length: ");
-			request.append(this.getBodyLength());
+			request.append(this.getContentLength());
 		} 
 		
 		if (this.getQuery() != null) {
@@ -85,8 +85,8 @@ public class PEASHeader {
 			map.put("query", this.getQuery());
 		}
 		
-		if (this.getBodyLength() > 0) {
-			map.put("bodylength", String.valueOf(this.getBodyLength()));
+		if (this.getContentLength() > 0) {
+			map.put("bodylength", String.valueOf(this.getContentLength()));
 		}
 		
 		return JSONValue.toJSONString(map);
@@ -142,12 +142,12 @@ public class PEASHeader {
 		this.status = status;
 	}
 
-	public int getBodyLength() {
-		return bodyLength;
+	public int getContentLength() {
+		return contentLength;
 	}
 
-	public void setBodyLength(int bodyLength) {
-		this.bodyLength = bodyLength;
+	public void setContentLength(int contentLength) {
+		this.contentLength = contentLength;
 	}
 
 	public String getForward() {

@@ -33,10 +33,10 @@ public class KeyHandler extends SimpleChannelInboundHandler<PEASObject> {
             header.setCommand("RESPONSE");
             header.setIssuer(obj.getHeader().getIssuer());
             header.setStatus("100");
-            header.setBodyLength(keyBytes.length);
+            header.setContentLength(keyBytes.length);
             
             PEASBody body = new PEASBody(keyBytes.length);
-            body.getBody().writeBytes(keyBytes);
+            body.getContent().writeBytes(keyBytes);
             
             PEASResponse res = new PEASResponse(header, body);
             

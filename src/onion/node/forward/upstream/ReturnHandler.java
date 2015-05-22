@@ -2,6 +2,7 @@ package onion.node.forward.upstream;
 
 import javax.crypto.Cipher;
 
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
@@ -17,13 +18,15 @@ public class ReturnHandler extends SimpleChannelInboundHandler<PEASObject> {
 	private PEASObject obj;
 	private Cipher cipher;
 
-    public ReturnHandler(Channel inboundChannel, PEASObject toSend, Cipher AEScipher) {
+    public ReturnHandler(Channel inboundChannel, Cipher AEScipher) {
         this.inboundChannel = inboundChannel;
-        this.obj = toSend;
+        //this.obj = toSend;
         this.cipher = AEScipher;
     }
     
     @Override public void channelActive(ChannelHandlerContext ctx) {
+    	//ctx.writeAndFlush(Unpooled.EMPTY_BUFFER);
+    	/*
     	ChannelFuture f = ctx.writeAndFlush(obj);
 
         f.addListener(new ChannelFutureListener() {
@@ -36,7 +39,7 @@ public class ReturnHandler extends SimpleChannelInboundHandler<PEASObject> {
                 }
             }
         });
-        
+        */
     }
 
     @Override
@@ -46,11 +49,11 @@ public class ReturnHandler extends SimpleChannelInboundHandler<PEASObject> {
 
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, PEASObject toReturn) throws Exception {
-		toReturn.getHeader().setIssuer(obj.getHeader().getIssuer());
+		toReturn.getHeader().setIssuer("ONION");
 		// encrypt the return msg
-		byte[] enc = cipher.doFinal(toReturn.getBody().getBody().array());
+		byte[] enc = cipher.doFinal(toReturn.getBody().getContent().array());
 		// set new bodylength
-		toReturn.getHeader().setBodyLength(enc.length);
+		toReturn.getHeader().setContentLength(enc.length);
 		PEASBody body = new PEASBody(enc);
 		toReturn.setBody(body);
 		

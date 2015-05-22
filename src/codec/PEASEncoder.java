@@ -46,7 +46,7 @@ public class PEASEncoder extends MessageToByteEncoder<PEASObject>{
 		// write header to downstream
 		out.writeBytes(ByteBufUtil.encodeString(ctx.alloc(), CharBuffer.wrap(obj.getHeader().toString()), charset));
 		// write body to downstream
-		out.writeBytes(obj.getBody().getBody());
+		out.writeBytes(obj.getBody().getContent());
 		// append line separator at the end of the body for framing
 		//out.writeBytes(ByteBufUtil.encodeString(ctx.alloc(), CharBuffer.wrap(System.lineSeparator()), charset));
 	}

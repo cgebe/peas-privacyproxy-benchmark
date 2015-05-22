@@ -118,7 +118,7 @@ public class PEASDecoder3 extends ByteToMessageDecoder {
                 chunkSize = contentLength;
             }
             
-            body = new PEASBody(header.getBodyLength());
+            body = new PEASBody(header.getContentLength());
             // We return here, this forces decode to be called again where we will decode the content
             return;
 	        
@@ -128,12 +128,14 @@ public class PEASDecoder3 extends ByteToMessageDecoder {
 	    }
 	    case READ_CONTENT: {
 	        int readLimit = buffer.readableBytes();
+
 	        // Check if the buffer is readable first as we use the readable byte count
 	        // to write the PEASBody. This is needed as otherwise we may end up with
 	        // create a Body instance that contains an empty buffer and so is
 	        // handled like it is the last one.
 
 	        if (readLimit == 0) {
+	        	System.out.println("ret 0");
 	            return;
 	        }
 	
@@ -143,14 +145,15 @@ public class PEASDecoder3 extends ByteToMessageDecoder {
 	        }
 	        ByteBuf content = buffer.readSlice(toRead).retain();
 	        chunkSize -= toRead;
-	
 	        if (chunkSize == 0) {
+		        System.err.println("Decoder: whole msg received");
 	            // Read all content.
-	        	body.getBody().writeBytes(content);
+	        	body.getContent().writeBytes(content);
 	            out.add(new PEASMessage(this.header, body));
 	            resetNow();
 	        } else {
-	        	body.getBody().writeBytes(content);
+	        	System.err.println("Decoder: partially msg received");
+	        	body.getContent().writeBytes(content);
 	        }
 	        return;
 	    }
@@ -206,7 +209,7 @@ public class PEASDecoder3 extends ByteToMessageDecoder {
                     		this.header.setProtocol(value.toString());
                     	}
                     	if (name.toString().equals("Content-Length")) {
-                    		this.header.setBodyLength(Integer.parseInt(value.toString()));
+                    		this.header.setContentLength(Integer.parseInt(value.toString()));
                     	}
                     	if (name.toString().equals("Query")) {
                     		this.header.setQuery(value.toString());
@@ -234,7 +237,7 @@ public class PEASDecoder3 extends ByteToMessageDecoder {
         		this.header.setProtocol(value.toString());
         	}
         	if (name.toString().equals("Content-Length")) {
-        		this.header.setBodyLength(Integer.parseInt(value.toString()));
+        		this.header.setContentLength(Integer.parseInt(value.toString()));
         	}
         	if (name.toString().equals("Query")) {
         		this.header.setQuery(value.toString());
@@ -249,7 +252,7 @@ public class PEASDecoder3 extends ByteToMessageDecoder {
 
     private long contentLength() {
         if (contentLength == Long.MIN_VALUE) {
-            contentLength = this.header.getBodyLength();
+            contentLength = this.header.getContentLength();
         }
         return contentLength;
     }

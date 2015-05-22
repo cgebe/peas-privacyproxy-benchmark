@@ -206,7 +206,7 @@ public class TestPEASProtocol {
 			header.setCommand(c);
 			header.setIssuer((String) obj.get("issuer"));
 			header.setProtocol((String) obj.get("protocol"));
-			header.setBodyLength(Integer.parseInt((String) obj.get("bodylength")));
+			header.setContentLength(Integer.parseInt((String) obj.get("bodylength")));
 			header.setQuery((String) obj.get("query"));
 
 			return header;
@@ -215,7 +215,7 @@ public class TestPEASProtocol {
 			header.setCommand(c);
 			header.setStatus((String) obj.get("status"));
 			header.setProtocol((String) obj.get("protocol"));
-			header.setBodyLength(Integer.parseInt((String) obj.get("bodylength")));
+			header.setContentLength(Integer.parseInt((String) obj.get("bodylength")));
 			
 			
 			return header;

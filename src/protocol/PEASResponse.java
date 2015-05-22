@@ -23,7 +23,7 @@ public class PEASResponse extends PEASObject implements Serializable {
 		StringBuilder response = new StringBuilder();
 		
 		response.append(header.toString());
-		response.append(body.getBody().toString());
+		response.append(body.getContent().toString());
 		
 		return response.toString();
 	}
@@ -34,9 +34,9 @@ public class PEASResponse extends PEASObject implements Serializable {
 		
 		map.put("command", header.getCommand());
 		map.put("status", header.getStatus());
-		map.put("bodylength", String.valueOf(header.getBodyLength()));
+		map.put("bodylength", String.valueOf(header.getContentLength()));
 		map.put("protocol", header.getProtocol());
-		map.put("body", body.getBody().toString());
+		map.put("body", body.getContent().toString());
 
 		return JSONValue.toJSONString(map);
 	}

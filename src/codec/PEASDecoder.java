@@ -70,7 +70,7 @@ public class PEASDecoder extends MessageToMessageDecoder<ByteBuf> {
 					ctx.pipeline().remove("framedecoder");
 					//removed = ctx.pipeline().replace("framedecoder", "lframedecoder", new FixedLengthFrameDecoder(1));
 					writeBody = true;
-					body = new PEASBody(header.getBodyLength());
+					body = new PEASBody(header.getContentLength());
 				}
 				
 				String[] values = p.split(headerField);
@@ -88,12 +88,12 @@ public class PEASDecoder extends MessageToMessageDecoder<ByteBuf> {
 				}
 				
 				if (values[0].equals("Content-Length:")) {
-					header.setBodyLength(Integer.parseInt(values[1]));
+					header.setContentLength(Integer.parseInt(values[1]));
 				}
 			}
 		} else {
 			System.out.println("write body");
-			if (header.getBodyLength() <= 0) {
+			if (header.getContentLength() <= 0) {
 				if (header.getCommand().equals("KEY") || header.getCommand().equals("QUERY")) {
 					out.add(new PEASRequest(header, body));
 				} else {
@@ -106,10 +106,10 @@ public class PEASDecoder extends MessageToMessageDecoder<ByteBuf> {
 				this.header = new PEASHeader();
 			} else {
 				writeIndex += msg.capacity();
-				body.getBody().writeBytes(msg);
+				body.getContent().writeBytes(msg);
 				System.out.println(msg.capacity());
 				System.out.println(writeIndex);
-				if (writeIndex + 1 >= header.getBodyLength()) {
+				if (writeIndex + 1 >= header.getContentLength()) {
 					if (header.getCommand().equals("QUERY")) {
 						out.add(new PEASRequest(header, body));
 					} else {

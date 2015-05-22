@@ -25,9 +25,9 @@ public class ForwardChannelInitializer extends ChannelInitializer<SocketChannel>
 	private PEASObject obj;
 	private Cipher cipher;
 	
-	public ForwardChannelInitializer(Channel inboundChannel, PEASObject toSend, Cipher AEScipher) {
+	public ForwardChannelInitializer(Channel inboundChannel, Cipher AEScipher) {
         this.inboundChannel = inboundChannel;
-        this.obj = toSend;
+        //this.obj = toSend;
         this.cipher = AEScipher;
     }
 
@@ -38,7 +38,7 @@ public class ForwardChannelInitializer extends ChannelInitializer<SocketChannel>
         pipeline.addLast("peasdecoder", new PEASDecoder3());  // upstream 1
         pipeline.addLast("peasencoder", new PEASEncoder()); // downstream 1
         pipeline.addLast("peasprinter", new PEASPrinter()); // upstream 2
-        pipeline.addLast("returner", new ReturnHandler(inboundChannel, obj, cipher)); // upstream 3
+        pipeline.addLast("returner", new ReturnHandler(inboundChannel, cipher)); // upstream 3
 	}
 
 }
