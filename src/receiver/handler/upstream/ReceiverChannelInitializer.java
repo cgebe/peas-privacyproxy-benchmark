@@ -1,5 +1,6 @@
 package receiver.handler.upstream;
 
+import receiver.server.ReceiverServer;
 import codec.PEASDecoder;
 import codec.PEASDecoder2;
 import codec.PEASDecoder3;
@@ -14,6 +15,11 @@ import io.netty.handler.codec.FixedLengthFrameDecoder;
 public class ReceiverChannelInitializer extends ChannelInitializer<SocketChannel> {
 	
 	private ChannelPipeline pipeline;
+	private ReceiverServer server;
+	
+	public ReceiverChannelInitializer(ReceiverServer server) {
+		this.server = server;
+	}
 
 	@Override
 	protected void initChannel(SocketChannel ch) throws Exception {
@@ -22,7 +28,7 @@ public class ReceiverChannelInitializer extends ChannelInitializer<SocketChannel
         pipeline.addLast("peasdecoder", new PEASDecoder3()); // upstream 1
         pipeline.addLast("peasencoder", new PEASEncoder()); // downstream 1
         pipeline.addLast("peasprinter", new PEASPrinter()); // upstream 2
-        pipeline.addLast("forwarder", new ForwardHandler()); // upstream 3
+        pipeline.addLast("forwarder", new ForwardHandler(server)); // upstream 3
 	}
 
 }

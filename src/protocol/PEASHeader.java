@@ -14,11 +14,13 @@ public class PEASHeader {
 	private String status;
 	private int contentLength;
 	private String forward;
+	private String receiverid;
 	
 	public PEASHeader() {
 		command = null;
 		query = null;
 		forward = null;
+		setReceiverID(null);
 		issuer = null;
 		protocol = null;
 		status = null;
@@ -41,6 +43,12 @@ public class PEASHeader {
 			request.append(System.lineSeparator());
 			request.append("Status: ");
 			request.append(this.getStatus());
+		} 
+		
+		if (this.getReceiverID() != null) {
+			request.append(System.lineSeparator());
+			request.append("Receiver-ID: ");
+			request.append(this.getReceiverID());
 		} 
 		
 		if (this.getProtocol() != null) {
@@ -156,6 +164,14 @@ public class PEASHeader {
 
 	public void setForward(String forward) {
 		this.forward = forward;
+	}
+
+	public String getReceiverID() {
+		return receiverid;
+	}
+
+	public void setReceiverID(String receiverid) {
+		this.receiverid = receiverid;
 	}
 
 }

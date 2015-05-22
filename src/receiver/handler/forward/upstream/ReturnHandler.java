@@ -12,12 +12,13 @@ public class ReturnHandler extends SimpleChannelInboundHandler<PEASObject> {
 	private final Channel inboundChannel;
 	private PEASObject obj;
 
-    public ReturnHandler(Channel inboundChannel, PEASObject toSend) {
+    public ReturnHandler(Channel inboundChannel) {
         this.inboundChannel = inboundChannel;
-        this.obj = toSend;
+        //this.obj = toSend;
     }
     
     @Override public void channelActive(ChannelHandlerContext ctx) {
+    	/*
     	ChannelFuture f = ctx.writeAndFlush(obj);
 
         f.addListener(new ChannelFutureListener() {
@@ -30,7 +31,7 @@ public class ReturnHandler extends SimpleChannelInboundHandler<PEASObject> {
                 }
             }
         });
-        
+        */
     }
 
     @Override

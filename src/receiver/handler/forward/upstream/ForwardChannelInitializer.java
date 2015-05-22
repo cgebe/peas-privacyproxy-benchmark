@@ -25,9 +25,9 @@ public class ForwardChannelInitializer extends ChannelInitializer<SocketChannel>
 	private Channel inboundChannel;
 	private PEASObject obj;
 	
-	public ForwardChannelInitializer(Channel inboundChannel, PEASObject toSend) {
+	public ForwardChannelInitializer(Channel inboundChannel) {
         this.inboundChannel = inboundChannel;
-        this.obj = toSend;
+        //this.obj = toSend;
     }
 
 	@Override
@@ -37,7 +37,7 @@ public class ForwardChannelInitializer extends ChannelInitializer<SocketChannel>
         pipeline.addLast("peasdecoder", new PEASDecoder3());  // upstream 1
         pipeline.addLast("peasencoder", new PEASEncoder()); // downstream 1
         pipeline.addLast("peasprinter", new PEASPrinter()); // upstream 2
-        pipeline.addLast("returner", new ReturnHandler(inboundChannel, obj)); // upstream 3
+        pipeline.addLast("returner", new ReturnHandler(inboundChannel)); // upstream 3
 	}
 
 }

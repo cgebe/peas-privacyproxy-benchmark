@@ -1,7 +1,12 @@
 package receiver.handler.upstream;
 
+import java.util.Random;
+
 import protocol.PEASObject;
+import protocol.PEASRequest;
 import receiver.handler.forward.upstream.ForwardChannelInitializer;
+import receiver.server.ReceiverServer;
+import util.Config;
 import util.Message;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.Unpooled;
@@ -15,6 +20,11 @@ import io.netty.channel.SimpleChannelInboundHandler;
 
 public class ForwardHandler extends SimpleChannelInboundHandler<PEASObject> {
 
+	private ReceiverServer server;
+
+	public ForwardHandler(ReceiverServer server) {
+		this.server = server;
+	}
 
     /**
      * Closes the specified channel after all queued write requests are flushed.
@@ -28,29 +38,93 @@ public class ForwardHandler extends SimpleChannelInboundHandler<PEASObject> {
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, PEASObject obj) throws Exception {
 		Channel inboundChannel = ctx.channel();
+		
+		if (Config.getInstance().getValue("SINGLE_SOCKET").equals("on")) {
+			// Generate id for this client/peas request
+			String id = randomID(32);
+			obj.getHeader().setReceiverID(id);
+			server.getClients().put(id, inboundChannel);
+			
+			if (server.getIssuers().get(obj.getHeader().getIssuer()) == null) {
+		        // Start the connection attempt.
+		        Bootstrap b = new Bootstrap();
+		        b.group(inboundChannel.eventLoop())
+		         .channel(ctx.channel().getClass())
+		         .handler(new ForwardChannelInitializer(inboundChannel));
+		        
+		        ChannelFuture f = b.connect(obj.getHeader().getIssuerAddress(), obj.getHeader().getIssuerPort());
+	
+		        Channel ch = f.channel();
+		        server.getIssuers().put(obj.getHeader().getIssuer(), ch);
+		        
+		        f.addListener(new ChannelFutureListener() {
+		            @Override
+		            public void operationComplete(ChannelFuture future) {
+		                if (future.isSuccess()) {
+		                	System.out.println("connected to issuer");
+		                	ChannelFuture f = ch.writeAndFlush(obj);
+		                	
+		                	f.addListener(new ChannelFutureListener() {
+		    		            @Override
+		    		            public void operationComplete(ChannelFuture future) {
+		    		                if (future.isSuccess()) {
 
-        // Start the connection attempt.
-        Bootstrap b = new Bootstrap();
-        b.group(inboundChannel.eventLoop())
-         .channel(ctx.channel().getClass())
-         .handler(new ForwardChannelInitializer(inboundChannel, obj));
-        
-        ChannelFuture f = b.connect(obj.getHeader().getIssuerAddress(), obj.getHeader().getIssuerPort());
-       
-        f.addListener(new ChannelFutureListener() {
-            @Override
-            public void operationComplete(ChannelFuture future) {
-                if (future.isSuccess()) {
-                	System.out.println("connected to issuer");
-                } else {
-                	// TODO: normally send peas response with status code that issuer is not available
+		    		                } else {
+		    		                	future.cause().printStackTrace();
+		    		                	inboundChannel.close();
+		    		                }
+		    		            }
+		    		        });
+		                } else {
+		                	// TODO: normally send peas response with status code that issuer is not available
+	
+		                    // Close the connection if the connection attempt has failed.
+		                	System.out.println("not connected to next node");
+		                    inboundChannel.close();
+		                }
+		            }
+		        });
+			} else {
+				server.getIssuers().get(obj.getHeader().getIssuer()).writeAndFlush(obj);
+			}
+			
+		} else {
+	        // Start the connection attempt.
+	        Bootstrap b = new Bootstrap();
+	        b.group(inboundChannel.eventLoop())
+	         .channel(ctx.channel().getClass())
+	         .handler(new ForwardChannelInitializer(inboundChannel));
+	        
+	        ChannelFuture f = b.connect(obj.getHeader().getIssuerAddress(), obj.getHeader().getIssuerPort());
+	        Channel ch = f.channel();
+	        
+	        f.addListener(new ChannelFutureListener() {
+	            @Override
+	            public void operationComplete(ChannelFuture future) {
+	                if (future.isSuccess()) {
+	                	System.out.println("connected to issuer");
+	                	ChannelFuture f = ch.writeAndFlush(obj);
+	                	
+	                	f.addListener(new ChannelFutureListener() {
+	    		            @Override
+	    		            public void operationComplete(ChannelFuture future) {
+	    		                if (future.isSuccess()) {
 
-                    // Close the connection if the connection attempt has failed.
-                	System.out.println("not connected to issuer");
-                    inboundChannel.close();
-                }
-            }
-        });
+	    		                } else {
+	    		                	future.cause().printStackTrace();
+	    		                }
+	    		            }
+	    		        });
+	                } else {
+	                	// TODO: normally send peas response with status code that issuer is not available
+
+	                    // Close the connection if the connection attempt has failed.
+	                	System.out.println("not connected to issuer");
+	                    inboundChannel.close();
+	                }
+	            }
+	        });
+		}
         
 	}
 	
@@ -59,5 +133,19 @@ public class ForwardHandler extends SimpleChannelInboundHandler<PEASObject> {
         cause.printStackTrace();
         //closeOnFlush(ctx.channel());
     }
+    
+
+	static final String AB = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	static Random rnd = new Random();
+	
+	private String randomID(int length) 
+	{
+	   StringBuilder sb = new StringBuilder(length);
+	   for( int i = 0; i < length; i++ ) 
+	      sb.append( AB.charAt( rnd.nextInt(AB.length()) ) );
+	   return sb.toString();
+	}
+
+
 
 }

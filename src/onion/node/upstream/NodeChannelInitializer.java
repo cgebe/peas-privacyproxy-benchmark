@@ -59,7 +59,7 @@ public class NodeChannelInitializer extends ChannelInitializer<SocketChannel> {
         pipeline.addLast("peasdecoder", new PEASDecoder3()); // upstream 1
         pipeline.addLast("peasencoder", new PEASEncoder()); // downstream 1
         pipeline.addLast("peasprinter", new PEASPrinter()); // upstream 2
-        pipeline.addLast("forwarder", new ForwardHandler2(this)); // upstream 3
+        pipeline.addLast("forwarder", new ForwardHandler(this)); // upstream 3
         pipeline.addLast("handshakehandler", new HandshakeHandler(this)); // upstream 4
         pipeline.addLast("queryhandler", new QueryHandler(this)); // upstream 5
 	}

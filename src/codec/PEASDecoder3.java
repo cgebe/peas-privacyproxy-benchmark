@@ -205,6 +205,9 @@ public class PEASDecoder3 extends ByteToMessageDecoder {
                     	if (name.toString().equals("Forward")) {
                     		this.header.setForward(value.toString());
                     	}
+                    	if (name.toString().equals("Receiver-ID")) {
+                    		this.header.setReceiverID(value.toString());
+                    	}
                     	if (name.toString().equals("Protocol")) {
                     		this.header.setProtocol(value.toString());
                     	}
@@ -232,6 +235,9 @@ public class PEASDecoder3 extends ByteToMessageDecoder {
         	}
         	if (name.toString().equals("Forward")) {
         		this.header.setForward(value.toString());
+        	}
+        	if (name.toString().equals("Receiver-ID")) {
+        		this.header.setReceiverID(value.toString());
         	}
         	if (name.toString().equals("Protocol")) {
         		this.header.setProtocol(value.toString());
