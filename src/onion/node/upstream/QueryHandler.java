@@ -24,9 +24,8 @@ public class QueryHandler extends SimpleChannelInboundHandler<PEASObject> {
 
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, PEASObject obj) throws Exception {
-		if (obj.getHeader().getCommand().equals("QUERY")) {
-			if (obj.getHeader().getForward() == null) {
-				
+		if (obj.getHeader().getForward() == null) {
+			if (obj.getHeader().getCommand().equals("QUERY")) {
 
 				PEASHeader header = new PEASHeader();
 				header.setCommand("RESPONSE");
@@ -46,10 +45,8 @@ public class QueryHandler extends SimpleChannelInboundHandler<PEASObject> {
 				b = initializer.getAEScipher().doFinal(b);
 				PEASBody body = new PEASBody(b);
 				
-				PEASResponse res = new PEASResponse(header, body);
-				
 				// send response back
-	            ChannelFuture f = ctx.writeAndFlush(res);
+	            ChannelFuture f = ctx.writeAndFlush(new PEASResponse(header, body));
 	            
 	            f.addListener(new ChannelFutureListener() {
 	                @Override
@@ -63,7 +60,11 @@ public class QueryHandler extends SimpleChannelInboundHandler<PEASObject> {
 	                }
 	            });
 				
-			}
+			} else {
+				ctx.fireChannelRead(obj);
+			}  
+		} else {
+			ctx.fireChannelRead(obj);
 		}
 	}
 }

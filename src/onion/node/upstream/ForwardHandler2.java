@@ -43,6 +43,7 @@ public class ForwardHandler2 extends SimpleChannelInboundHandler<PEASObject> {
 			}
 			
 			header.setCommand(obj.getHeader().getCommand());
+			header.setQuery(obj.getHeader().getQuery());
 			header.setIssuer("ONION");
 			String[] address = forward[0].split(":");
 			
