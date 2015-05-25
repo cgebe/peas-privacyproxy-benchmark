@@ -5,8 +5,7 @@ import java.util.regex.Pattern;
 
 import protocol.PEASBody;
 import protocol.PEASHeader;
-import protocol.PEASRequest;
-import protocol.PEASResponse;
+import protocol.PEASMessage;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -86,11 +85,8 @@ public class PEASDecoder2 extends DelimiterBasedFrameDecoder {
 		} else {
 			System.out.println("write body");
 			if (header.getContentLength() <= 0) {
-				if (header.getCommand().equals("KEY") || header.getCommand().equals("QUERY")) {
-					return new PEASRequest(header, body);
-				} else {
-					return new PEASResponse(header, body);
-				}
+				return new PEASMessage(header, body);
+
 				// add decoder again
 				//ctx.pipeline().replace("lframedecoder", "framedecoder", removed);
 			} else {
@@ -99,11 +95,8 @@ public class PEASDecoder2 extends DelimiterBasedFrameDecoder {
 				System.out.println(buffer.capacity());
 				System.out.println(writeIndex);
 				if (writeIndex + 1 == header.getContentLength()) {
-					if (header.getCommand().equals("QUERY")) {
-						return new PEASRequest(header, body);
-					} else {
-						return new PEASResponse(header, body);
-					}
+					return new PEASMessage(header, body);
+
 					// add decoder again
 					//ctx.pipeline().replace("lframedecoder", "framedecoder", removed);
 				} else {

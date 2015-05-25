@@ -1,16 +1,10 @@
 package issuer.handler.upstream;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.security.KeyFactory;
-import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Random;
 
-import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
@@ -19,15 +13,12 @@ import org.apache.commons.codec.binary.Base64;
 
 import protocol.PEASBody;
 import protocol.PEASHeader;
-import protocol.PEASObject;
-import protocol.PEASResponse;
-import server.dao.Query;
+import protocol.PEASMessage;
 import util.Encryption;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
@@ -37,7 +28,7 @@ import org.bouncycastle.crypto.engines.RSAEngine;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.util.PrivateKeyFactory;
 
-public class QueryHandler extends SimpleChannelInboundHandler<PEASObject> {
+public class QueryHandler extends SimpleChannelInboundHandler<PEASMessage> {
 
 
 	private static final int KEY_SIZE = 16;
@@ -49,7 +40,7 @@ public class QueryHandler extends SimpleChannelInboundHandler<PEASObject> {
         byte[] ivBytes = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
         iv = new IvParameterSpec(ivBytes);
         
-        byte[] keyBytes = Files.readAllBytes(Paths.get(".").resolve("privKey2.der"));
+        byte[] keyBytes = Files.readAllBytes(Paths.get("./resources/").resolve("privKey2.der"));
         AsymmetricKeyParameter privateKey = PrivateKeyFactory.createKey(keyBytes);
         
         RSAdecipher = new PKCS1Encoding(new RSAEngine());
@@ -63,7 +54,7 @@ public class QueryHandler extends SimpleChannelInboundHandler<PEASObject> {
 	}
 
 	@Override
-	protected void channelRead0(ChannelHandlerContext ctx, PEASObject obj) throws Exception {
+	protected void channelRead0(ChannelHandlerContext ctx, PEASMessage obj) throws Exception {
 		if (obj.getHeader().getCommand().equals("QUERY")) {
 			System.out.println("query received");
 			// TODO: decrypt query field and body, and dispatch http or forward to another issuer
@@ -78,17 +69,18 @@ public class QueryHandler extends SimpleChannelInboundHandler<PEASObject> {
 			PEASHeader header = new PEASHeader();
 			header.setCommand("RESPONSE");
 			header.setIssuer(obj.getHeader().getIssuer());
+			header.setReceiverID(obj.getHeader().getReceiverID());
 			header.setStatus("100");
 			header.setProtocol("HTTP");
 			
 			byte[] b = new byte[size];
 			new Random().nextBytes(b);
-			b = Encryption.AESencrypt(b, currentKey, iv);
+			byte[] enc = Encryption.AESencrypt(b, currentKey, iv);
 			
-			header.setContentLength(b.length);
-			PEASBody body = new PEASBody(b);
+			header.setContentLength(enc.length);
+			PEASBody body = new PEASBody(enc);
 			
-			PEASResponse res = new PEASResponse(header, body);
+			PEASMessage res = new PEASMessage(header, body);
 			
 			// send response back
             ChannelFuture f = ctx.writeAndFlush(res);

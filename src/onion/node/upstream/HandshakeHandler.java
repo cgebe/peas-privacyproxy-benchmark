@@ -30,8 +30,7 @@ import org.bouncycastle.crypto.InvalidCipherTextException;
 
 import protocol.PEASBody;
 import protocol.PEASHeader;
-import protocol.PEASObject;
-import protocol.PEASResponse;
+import protocol.PEASMessage;
 import util.Encryption;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -41,7 +40,7 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
-public class HandshakeHandler extends SimpleChannelInboundHandler<PEASObject> {
+public class HandshakeHandler extends SimpleChannelInboundHandler<PEASMessage> {
 	
 	private NodeChannelInitializer initializer;
 
@@ -50,7 +49,7 @@ public class HandshakeHandler extends SimpleChannelInboundHandler<PEASObject> {
 	}
 
 	@Override
-	protected void channelRead0(ChannelHandlerContext ctx, PEASObject obj) throws Exception {
+	protected void channelRead0(ChannelHandlerContext ctx, PEASMessage obj) throws Exception {
 		if (obj.getHeader().getForward() == null) {
 			if (obj.getHeader().getCommand().equals("HANDSHAKE")) {
 	            // Decrypt the payload in output
@@ -68,7 +67,7 @@ public class HandshakeHandler extends SimpleChannelInboundHandler<PEASObject> {
 	            header.setContentLength(key.capacity());
 	            PEASBody body = new PEASBody(key);
 
-	            ChannelFuture f = ctx.writeAndFlush(new PEASResponse(header, body));
+	            ChannelFuture f = ctx.writeAndFlush(new PEASMessage(header, body));
 	            
 	            f.addListener(new ChannelFutureListener() {
 	                @Override

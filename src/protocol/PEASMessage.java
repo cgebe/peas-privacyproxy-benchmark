@@ -1,18 +1,26 @@
 package protocol;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.json.simple.JSONValue;
 
-public class PEASMessage extends PEASObject {
+public class PEASMessage implements Serializable {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8994528029805801398L;
+	private PEASHeader header;
+	private PEASBody body;
 	
 	public PEASMessage(PEASHeader header, PEASBody body) {
 		this.header = header;
 		this.body = body;
 	}
 
-	@Override
+
 	public String toString() {
 		StringBuilder request = new StringBuilder();
 		
@@ -22,7 +30,7 @@ public class PEASMessage extends PEASObject {
 		return request.toString();
 	}
 	
-	@Override
+
 	public String toJSONString() {
 		Map<String, String> map = new HashMap<String, String>();
 		
@@ -60,5 +68,4 @@ public class PEASMessage extends PEASObject {
 	public void setBody(PEASBody body) {
 		this.body = body;
 	}
-
 }

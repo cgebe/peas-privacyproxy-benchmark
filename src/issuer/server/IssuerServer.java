@@ -31,10 +31,14 @@ public class IssuerServer {
             ServerBootstrap b = new ServerBootstrap(); 
             b.group(bossGroup, workerGroup)
              .channel(NioServerSocketChannel.class) 
-             .handler(new LoggingHandler(LogLevel.INFO))
              .childHandler(new IssuerChannelInitializer())
              .option(ChannelOption.SO_BACKLOG, 128)         
              .childOption(ChannelOption.SO_KEEPALIVE, true); 
+            
+    		// Logging on?
+    		if (Config.getInstance().getValue("LOGGING").equals("on")) {
+    			b.handler(new LoggingHandler(LogLevel.INFO));
+    		}
 
             // Bind and start to accept incoming connections.
             ChannelFuture f = b.bind(port).sync(); 

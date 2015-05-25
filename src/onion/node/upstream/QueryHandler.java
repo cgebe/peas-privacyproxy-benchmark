@@ -11,10 +11,9 @@ import org.apache.commons.codec.binary.Base64;
 
 import protocol.PEASBody;
 import protocol.PEASHeader;
-import protocol.PEASObject;
-import protocol.PEASResponse;
+import protocol.PEASMessage;
 
-public class QueryHandler extends SimpleChannelInboundHandler<PEASObject> {
+public class QueryHandler extends SimpleChannelInboundHandler<PEASMessage> {
 	
 	private NodeChannelInitializer initializer;
 
@@ -23,7 +22,7 @@ public class QueryHandler extends SimpleChannelInboundHandler<PEASObject> {
 	}
 
 	@Override
-	protected void channelRead0(ChannelHandlerContext ctx, PEASObject obj) throws Exception {
+	protected void channelRead0(ChannelHandlerContext ctx, PEASMessage obj) throws Exception {
 		if (obj.getHeader().getForward() == null) {
 			if (obj.getHeader().getCommand().equals("QUERY")) {
 
@@ -42,11 +41,13 @@ public class QueryHandler extends SimpleChannelInboundHandler<PEASObject> {
 				int size = 8000;
 				byte[] b = new byte[size];
 				new Random().nextBytes(b);
-				b = initializer.getAEScipher().doFinal(b);
-				PEASBody body = new PEASBody(b);
+				byte[] enc = initializer.getAEScipher().doFinal(b);
+				
+				header.setContentLength(enc.length);
+				PEASBody body = new PEASBody(enc);
 				
 				// send response back
-	            ChannelFuture f = ctx.writeAndFlush(new PEASResponse(header, body));
+	            ChannelFuture f = ctx.writeAndFlush(new PEASMessage(header, body));
 	            
 	            f.addListener(new ChannelFutureListener() {
 	                @Override

@@ -10,9 +10,9 @@ import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.util.List;
 
-import protocol.PEASObject;
+import protocol.PEASMessage;
 
-public class PEASEncoder extends MessageToByteEncoder<PEASObject>{
+public class PEASEncoder extends MessageToByteEncoder<PEASMessage>{
 	
 	 // TODO Use CharsetEncoder instead.
     private final Charset charset;
@@ -42,7 +42,7 @@ public class PEASEncoder extends MessageToByteEncoder<PEASObject>{
      */
 
 	@Override
-	protected void encode(ChannelHandlerContext ctx, PEASObject obj, ByteBuf out) throws Exception {
+	protected void encode(ChannelHandlerContext ctx, PEASMessage obj, ByteBuf out) throws Exception {
 		// write header to downstream
 		out.writeBytes(ByteBufUtil.encodeString(ctx.alloc(), CharBuffer.wrap(obj.getHeader().toString()), charset));
 		// write body to downstream

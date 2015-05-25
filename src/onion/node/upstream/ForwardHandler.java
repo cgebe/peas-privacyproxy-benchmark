@@ -7,8 +7,7 @@ import org.apache.commons.codec.binary.Base64;
 
 import protocol.PEASBody;
 import protocol.PEASHeader;
-import protocol.PEASObject;
-import protocol.PEASRequest;
+import protocol.PEASMessage;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -18,7 +17,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.SimpleChannelInboundHandler;
 
-public class ForwardHandler extends SimpleChannelInboundHandler<PEASObject> {
+public class ForwardHandler extends SimpleChannelInboundHandler<PEASMessage> {
 	
 	private NodeChannelInitializer initializer;
 	private Channel outboundChannel;
@@ -28,7 +27,7 @@ public class ForwardHandler extends SimpleChannelInboundHandler<PEASObject> {
 	}
 
 	@Override
-	protected void channelRead0(ChannelHandlerContext ctx, PEASObject obj) throws Exception {
+	protected void channelRead0(ChannelHandlerContext ctx, PEASMessage obj) throws Exception {
 		if (obj.getHeader().getForward() != null) {
 			String[] forward = new String(initializer.getAESdecipher().doFinal(Base64.decodeBase64(obj.getHeader().getForward()))).split("_");
 			PEASHeader header = new PEASHeader();
@@ -71,7 +70,7 @@ public class ForwardHandler extends SimpleChannelInboundHandler<PEASObject> {
 		            public void operationComplete(ChannelFuture future) {
 		                if (future.isSuccess()) {
 
-		                	ChannelFuture f = outboundChannel.writeAndFlush(new PEASRequest(header, body));
+		                	ChannelFuture f = outboundChannel.writeAndFlush(new PEASMessage(header, body));
 		                	
 		                	f.addListener(new ChannelFutureListener() {
 		    		            @Override
@@ -93,7 +92,7 @@ public class ForwardHandler extends SimpleChannelInboundHandler<PEASObject> {
 		            }
 		        });
 			} else {
-				outboundChannel.writeAndFlush(new PEASRequest(header, body));
+				outboundChannel.writeAndFlush(new PEASMessage(header, body));
 			}
 		} else {
 			ctx.fireChannelRead(obj);

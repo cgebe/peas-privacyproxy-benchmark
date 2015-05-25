@@ -2,23 +2,20 @@ package receiver.handler.upstream;
 
 import java.util.Random;
 
-import protocol.PEASObject;
-import protocol.PEASRequest;
+import protocol.PEASMessage;
 import receiver.handler.forward.upstream.ForwardChannelInitializer;
+import receiver.handler.forward.upstream.SingleSocketForwardChannelInitializer;
 import receiver.server.ReceiverServer;
 import util.Config;
-import util.Message;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.channel.ChannelOption;
 import io.netty.channel.SimpleChannelInboundHandler;
 
-public class ForwardHandler extends SimpleChannelInboundHandler<PEASObject> {
+public class ForwardHandler extends SimpleChannelInboundHandler<PEASMessage> {
 
 	private ReceiverServer server;
 
@@ -26,17 +23,8 @@ public class ForwardHandler extends SimpleChannelInboundHandler<PEASObject> {
 		this.server = server;
 	}
 
-    /**
-     * Closes the specified channel after all queued write requests are flushed.
-     */
-    static void closeOnFlush(Channel ch) {
-        if (ch.isActive()) {
-            ch.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
-        }
-    }
-
 	@Override
-	protected void channelRead0(ChannelHandlerContext ctx, PEASObject obj) throws Exception {
+	protected void channelRead0(ChannelHandlerContext ctx, PEASMessage obj) throws Exception {
 		Channel inboundChannel = ctx.channel();
 		
 		if (Config.getInstance().getValue("SINGLE_SOCKET").equals("on")) {
@@ -50,7 +38,7 @@ public class ForwardHandler extends SimpleChannelInboundHandler<PEASObject> {
 		        Bootstrap b = new Bootstrap();
 		        b.group(inboundChannel.eventLoop())
 		         .channel(ctx.channel().getClass())
-		         .handler(new ForwardChannelInitializer(inboundChannel));
+		         .handler(new SingleSocketForwardChannelInitializer(server));
 		        
 		        ChannelFuture f = b.connect(obj.getHeader().getIssuerAddress(), obj.getHeader().getIssuerPort());
 	
@@ -135,7 +123,7 @@ public class ForwardHandler extends SimpleChannelInboundHandler<PEASObject> {
     }
     
 
-	static final String AB = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	static final String AB = "0123456789abcdefghijklmnopqrstuvwxyz";							
 	static Random rnd = new Random();
 	
 	private String randomID(int length) 

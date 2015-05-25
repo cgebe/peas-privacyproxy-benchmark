@@ -1,20 +1,20 @@
 package receiver.handler.forward.upstream;
 
 import protocol.PEASMessage;
-import io.netty.channel.Channel;
+import receiver.server.ReceiverServer;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
-public class ReturnHandler extends SimpleChannelInboundHandler<PEASMessage> {
+public class SingleSocketReturnHandler extends SimpleChannelInboundHandler<PEASMessage> {
 
-	private final Channel inboundChannel;
+	private ReceiverServer server;
 
-    public ReturnHandler(Channel inboundChannel) {
-        this.inboundChannel = inboundChannel;
+    public SingleSocketReturnHandler(ReceiverServer server) {
+        this.server = server;
     }
-
+    
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         cause.printStackTrace();
@@ -22,16 +22,18 @@ public class ReturnHandler extends SimpleChannelInboundHandler<PEASMessage> {
 
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, PEASMessage toReturn) throws Exception {
-        ChannelFuture f = inboundChannel.writeAndFlush(toReturn);
+        ChannelFuture f = server.getClients().get(toReturn.getHeader().getReceiverID()).writeAndFlush(toReturn);
         f.addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture future) {
-            	ctx.close();
             	future.channel().close();
+            	//server.getClients().get(toReturn.getHeader().getReceiverID()).close();
+            	server.getClients().remove(toReturn.getHeader().getReceiverID());
                 if (future.isSuccess()) {
                 	System.out.println("successful return");
                 } else {
                 	System.out.println("failed return");
+                    
                 }
             }
         });

@@ -12,11 +12,12 @@ import org.bouncycastle.crypto.encodings.PKCS1Encoding;
 import org.bouncycastle.crypto.engines.RSAEngine;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 
-import protocol.PEASObject;
+import protocol.PEASMessage;
 
 import com.squareup.crypto.rsa.NativeRSAEngine;
 
 import receiver.handler.upstream.PEASPrinter;
+import util.Config;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -54,8 +55,11 @@ public class NodeChannelInitializer extends ChannelInitializer<SocketChannel> {
 	@Override
 	protected void initChannel(SocketChannel ch) throws Exception {
 		pipeline = ch.pipeline();
-		//pipeline.addLast("framer", new FixedLengthFrameDecoder(1));
-		pipeline.addLast(new LoggingHandler(LogLevel.INFO));
+		
+		// Logging on?
+		if (Config.getInstance().getValue("LOGGING").equals("on")) {
+			pipeline.addLast(new LoggingHandler(LogLevel.INFO));
+		}
         pipeline.addLast("peasdecoder", new PEASDecoder3()); // upstream 1
         pipeline.addLast("peasencoder", new PEASEncoder()); // downstream 1
         pipeline.addLast("peasprinter", new PEASPrinter()); // upstream 2
@@ -63,62 +67,7 @@ public class NodeChannelInitializer extends ChannelInitializer<SocketChannel> {
         pipeline.addLast("handshakehandler", new HandshakeHandler(this)); // upstream 4
         pipeline.addLast("queryhandler", new QueryHandler(this)); // upstream 5
 	}
-	
 
-	public void forward(String host, int port, PEASObject obj, Channel returnChannel, ChannelHandlerContext ctx) throws InterruptedException {
-		//if (forward == null) {
-			// Start the connection attempt.
-	        Bootstrap b = new Bootstrap();
-	        b.group(returnChannel.eventLoop())
-	         .channel(ctx.channel().getClass())
-	         .handler(new ForwardChannelInitializer(returnChannel, this.getAEScipher()));
-	        
-	        ChannelFuture f = b.connect(host, port);
-	       
-	        f.addListener(new ChannelFutureListener() {
-	            @Override
-	            public void operationComplete(ChannelFuture future) {
-	                if (future.isSuccess()) {
-	                	System.out.println("connected to next node");
-	                } else {
-	                	// TODO: normally send peas response with status code that issuer is not available
-	
-	                    // Close the connection if the connection attempt has failed.
-	                	System.out.println("not connected to next node");
-	                    returnChannel.close();
-	                }
-	            }
-	        });
-	        
-	        forward = f.channel();
-	        /*
-		} else {
-			System.out.println(forward.isWritable());
-			ChannelFuture f = forward.writeAndFlush(obj);
-			
-			f.addListener(new ChannelFutureListener() {
-		    	@Override
-		        public void operationComplete(ChannelFuture future) {
-		    		if (future.isSuccess()) {
-		            	System.out.println("forward on existing successful");
-		            } else {
-		                // TODO: normally send peas response with status code that issuer is not available
-		
-		                // Close the connection if the connection attempt has failed.
-		                System.out.println("forward on existing failed");
-		                returnChannel.close();
-		            }
-		        }
-		    });
-		}
-		*/
-
-	}
-	
-	public void closeForward() {
-		forward.close();
-	}
-	
 	public AsymmetricBlockCipher getRSAdecipher() {
 		return RSAdecipher;
 	}

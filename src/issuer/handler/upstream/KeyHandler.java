@@ -5,8 +5,7 @@ import java.nio.file.Paths;
 
 import protocol.PEASBody;
 import protocol.PEASHeader;
-import protocol.PEASObject;
-import protocol.PEASResponse;
+import protocol.PEASMessage;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
@@ -15,7 +14,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 
 import java.nio.file.Path;
 
-public class KeyHandler extends SimpleChannelInboundHandler<PEASObject> {
+public class KeyHandler extends SimpleChannelInboundHandler<PEASMessage> {
 
 	@Override
 	public void exceptionCaught(ChannelHandlerContext arg0, Throwable arg1) throws Exception {
@@ -23,10 +22,10 @@ public class KeyHandler extends SimpleChannelInboundHandler<PEASObject> {
 	}
 
 	@Override
-	protected void channelRead0(ChannelHandlerContext ctx, PEASObject obj) throws Exception {
+	protected void channelRead0(ChannelHandlerContext ctx, PEASMessage obj) throws Exception {
 		if (obj.getHeader().getCommand().equals("KEY")) {
 
-            byte[] keyBytes = Files.readAllBytes(Paths.get(".").resolve("pubKey2.der"));
+            byte[] keyBytes = Files.readAllBytes(Paths.get("./resources/").resolve("pubKey2.der"));
             
             // construct key response
             PEASHeader header = new PEASHeader();
@@ -38,7 +37,7 @@ public class KeyHandler extends SimpleChannelInboundHandler<PEASObject> {
             PEASBody body = new PEASBody(keyBytes.length);
             body.getContent().writeBytes(keyBytes);
             
-            PEASResponse res = new PEASResponse(header, body);
+            PEASMessage res = new PEASMessage(header, body);
             
             // send reponse back
             ChannelFuture f = ctx.writeAndFlush(res);

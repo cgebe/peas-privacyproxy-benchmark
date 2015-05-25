@@ -8,9 +8,7 @@ import org.apache.commons.codec.binary.Base64;
 
 import protocol.PEASBody;
 import protocol.PEASHeader;
-import protocol.PEASObject;
-import protocol.PEASRequest;
-import protocol.PEASResponse;
+import protocol.PEASMessage;
 import util.Encryption;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
@@ -21,7 +19,7 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
-public class HandshakeForwardHandler extends SimpleChannelInboundHandler<PEASObject> {
+public class HandshakeForwardHandler extends SimpleChannelInboundHandler<PEASMessage> {
 	
 	private NodeChannelInitializer initializer;
 
@@ -30,7 +28,7 @@ public class HandshakeForwardHandler extends SimpleChannelInboundHandler<PEASObj
 	}
 
 	@Override
-	protected void channelRead0(ChannelHandlerContext ctx, PEASObject obj) throws Exception {
+	protected void channelRead0(ChannelHandlerContext ctx, PEASMessage obj) throws Exception {
 		if (obj.getHeader().getCommand().equals("HANDSHAKE")) {
 			if (obj.getHeader().getForward() != null) {
 

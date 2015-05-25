@@ -7,9 +7,7 @@ import org.json.simple.parser.JSONParser;
 
 import protocol.PEASBody;
 import protocol.PEASHeader;
-import protocol.PEASObject;
-import protocol.PEASRequest;
-import protocol.PEASResponse;
+import protocol.PEASMessage;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
 
@@ -23,14 +21,14 @@ public class JSONDecoder extends MessageToMessageDecoder<String> {
 		out.add(PEASObjectFromJSONObject(obj));
 	}
 
-	private PEASObject PEASObjectFromJSONObject(JSONObject obj) {
+	private PEASMessage PEASObjectFromJSONObject(JSONObject obj) {
 		String c = (String) obj.get("command");
 		if (c.equals("KEY")) {
 			PEASHeader header = new PEASHeader();
 			header.setCommand(c);
 			header.setIssuer((String) obj.get("issuer"));
 			
-			return new PEASRequest(header, new PEASBody(0));
+			return new PEASMessage(header, new PEASBody(0));
 		} else if (c.equals("QUERY")) {
 			PEASHeader header = new PEASHeader();
 			header.setCommand(c);
@@ -39,7 +37,7 @@ public class JSONDecoder extends MessageToMessageDecoder<String> {
 			header.setContentLength((int) obj.get("bodylength"));
 			header.setQuery((String) obj.get("query"));
 
-			return new PEASRequest(header, new PEASBody(0));
+			return new PEASMessage(header, new PEASBody(0));
 		} else if (c.equals("RESPONSE")) {
 			PEASHeader header = new PEASHeader();
 			header.setCommand(c);
@@ -48,9 +46,9 @@ public class JSONDecoder extends MessageToMessageDecoder<String> {
 			header.setContentLength((int) obj.get("bodylength"));
 			
 			
-			return new PEASResponse(header, new PEASBody(0));
+			return new PEASMessage(header, new PEASBody(0));
 		} else {
-			return new PEASResponse(new PEASHeader(), new PEASBody(0));
+			return new PEASMessage(new PEASHeader(), new PEASBody(0));
 		}
 	}
 }

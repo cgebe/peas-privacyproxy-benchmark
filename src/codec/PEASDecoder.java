@@ -14,10 +14,8 @@ import java.util.regex.Pattern;
 
 import protocol.PEASBody;
 import protocol.PEASHeader;
-import protocol.PEASObject;
+import protocol.PEASMessage;
 import protocol.PEASParser;
-import protocol.PEASRequest;
-import protocol.PEASResponse;
 
 public class PEASDecoder extends MessageToMessageDecoder<ByteBuf> {
 	
@@ -94,11 +92,8 @@ public class PEASDecoder extends MessageToMessageDecoder<ByteBuf> {
 		} else {
 			System.out.println("write body");
 			if (header.getContentLength() <= 0) {
-				if (header.getCommand().equals("KEY") || header.getCommand().equals("QUERY")) {
-					out.add(new PEASRequest(header, body));
-				} else {
-					out.add(new PEASResponse(header, body));
-				}
+				out.add(new PEASMessage(header, body));
+
 				// add decoder again
 				//ctx.pipeline().replace("lframedecoder", "framedecoder", removed);
 				writeIndex = 0;
@@ -110,11 +105,8 @@ public class PEASDecoder extends MessageToMessageDecoder<ByteBuf> {
 				System.out.println(msg.capacity());
 				System.out.println(writeIndex);
 				if (writeIndex + 1 >= header.getContentLength()) {
-					if (header.getCommand().equals("QUERY")) {
-						out.add(new PEASRequest(header, body));
-					} else {
-						out.add(new PEASResponse(header, body));
-					}
+					out.add(new PEASMessage(header, body));
+
 					// add decoder again
 					//ctx.pipeline().replace("lframedecoder", "framedecoder", removed);
 					writeIndex = 0;
