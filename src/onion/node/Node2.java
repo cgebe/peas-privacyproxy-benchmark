@@ -39,7 +39,7 @@ public class Node2 {
     public Node2(int port) throws IOException {
         this.port = port;
         
-		byte[] keyBytes = Files.readAllBytes(Paths.get(".").resolve("privKey2.der"));
+		byte[] keyBytes = Files.readAllBytes(Paths.get("./resources/").resolve("privKey2.der"));
 		privateKey  = PrivateKeyFactory.createKey(keyBytes);
     }
 

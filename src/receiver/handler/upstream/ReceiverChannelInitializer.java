@@ -1,10 +1,9 @@
 package receiver.handler.upstream;
 
+
 import receiver.server.ReceiverServer;
 import util.Config;
 import codec.PEASDecoder;
-import codec.PEASDecoder2;
-import codec.PEASDecoder3;
 import codec.PEASEncoder;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
@@ -32,9 +31,12 @@ public class ReceiverChannelInitializer extends ChannelInitializer<SocketChannel
 		if (Config.getInstance().getValue("LOGGING").equals("on")) {
 			pipeline.addLast(new LoggingHandler(LogLevel.INFO));
 		}
-        pipeline.addLast("peasdecoder", new PEASDecoder3()); // upstream 1
+        pipeline.addLast("peasdecoder", new PEASDecoder()); // upstream 1
         pipeline.addLast("peasencoder", new PEASEncoder()); // downstream 1
-        pipeline.addLast("peasprinter", new PEASPrinter()); // upstream 2
+        
+        if (Config.getInstance().getValue("LOGGING").equals("on")) {
+        	pipeline.addLast("peasprinter", new PEASPrinter()); // upstream 2
+        }
         pipeline.addLast("forwarder", new ForwardHandler(server)); // upstream 3
 	}
 

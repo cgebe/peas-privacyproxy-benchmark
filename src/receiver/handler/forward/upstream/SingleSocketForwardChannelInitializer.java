@@ -8,7 +8,7 @@ import io.netty.handler.logging.LoggingHandler;
 import receiver.handler.upstream.PEASPrinter;
 import receiver.server.ReceiverServer;
 import util.Config;
-import codec.PEASDecoder3;
+import codec.PEASDecoder;
 import codec.PEASEncoder;
 
 public class SingleSocketForwardChannelInitializer extends ChannelInitializer<SocketChannel> {
@@ -27,9 +27,12 @@ public class SingleSocketForwardChannelInitializer extends ChannelInitializer<So
 		if (Config.getInstance().getValue("LOGGING").equals("on")) {
 			pipeline.addLast(new LoggingHandler(LogLevel.INFO));
 		}
-        pipeline.addLast("peasdecoder", new PEASDecoder3());  // upstream 1
+        pipeline.addLast("peasdecoder", new PEASDecoder());  // upstream 1
         pipeline.addLast("peasencoder", new PEASEncoder()); // downstream 1
-        pipeline.addLast("peasprinter", new PEASPrinter()); // upstream 2
+        
+        if (Config.getInstance().getValue("LOGGING").equals("on")) {
+        	pipeline.addLast("peasprinter", new PEASPrinter()); // upstream 2
+        }
         pipeline.addLast("returner", new SingleSocketReturnHandler(server)); // upstream 3
 	}
 
