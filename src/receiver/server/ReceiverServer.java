@@ -1,11 +1,13 @@
 package receiver.server;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import receiver.handler.upstream.ReceiverChannelInitializer;
 import util.Config;
+import util.Observer;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -24,12 +26,16 @@ public class ReceiverServer {
     private int port;
     private Map<String, Channel> issuers;
     private Map<String, Channel> clients;
+    private Executor executor = Executors.newSingleThreadExecutor();
 
     public ReceiverServer(int port) {
         this.port = port;
         if (Config.getInstance().getValue("SINGLE_SOCKET").equals("on")) {
         	this.setIssuers(new ConcurrentHashMap<String, Channel>());
         	this.setClients(new ConcurrentHashMap<String, Channel>());
+        }
+        if (Config.getInstance().getValue("MEASURE_SERVER_STATS").equals("on")) {
+        	executor.execute(new StatsWriter());
         }
     }
 
@@ -40,7 +46,8 @@ public class ReceiverServer {
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup)
              .channel(NioServerSocketChannel.class)
-             .childHandler(new ReceiverChannelInitializer(this));
+             .childHandler(new ReceiverChannelInitializer(this))
+             .option(ChannelOption.SO_BACKLOG, 2000);
 
     		// Logging on?
     		if (Config.getInstance().getValue("LOGGING").equals("on")) {
@@ -63,19 +70,40 @@ public class ReceiverServer {
     	new ReceiverServer(11777).run();
     }
 
-	public Map<String, Channel> getIssuers() {
+	public synchronized Map<String, Channel> getIssuers() {
 		return issuers;
 	}
 
-	public void setIssuers(Map<String, Channel> issuers) {
+	public synchronized void setIssuers(Map<String, Channel> issuers) {
 		this.issuers = issuers;
 	}
 
-	public Map<String, Channel> getClients() {
+	public synchronized Map<String, Channel> getClients() {
 		return clients;
 	}
 
-	public void setClients(Map<String, Channel> clients) {
+	public synchronized void setClients(Map<String, Channel> clients) {
 		this.clients = clients;
 	}
+	
+	private class StatsWriter implements Runnable {
+
+        private long interval;
+
+        public StatsWriter() {
+            interval = System.nanoTime();
+        }
+
+        @Override
+        public void run() {
+        	while(true) {
+	        	// every second print stats
+	        	if ((System.nanoTime() - interval) / 1e6 >= 1000) {
+	        		Observer.getInstance().printResultsToFile();
+	        		Observer.getInstance().reset();
+	        		interval = System.nanoTime();
+	        	}
+        	}
+        }
+    }
 }

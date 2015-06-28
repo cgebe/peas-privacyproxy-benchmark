@@ -1,18 +1,19 @@
 package issuer.handler.upstream;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 
 import protocol.PEASBody;
 import protocol.PEASHeader;
 import protocol.PEASMessage;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
-import java.nio.file.Path;
+
+import org.apache.commons.io.IOUtils;
 
 public class KeyHandler extends SimpleChannelInboundHandler<PEASMessage> {
 
@@ -25,7 +26,11 @@ public class KeyHandler extends SimpleChannelInboundHandler<PEASMessage> {
 	protected void channelRead0(ChannelHandlerContext ctx, PEASMessage obj) throws Exception {
 		if (obj.getHeader().getCommand().equals("KEY")) {
 
-            byte[] keyBytes = Files.readAllBytes(Paths.get("./resources/").resolve("pubKey2.der"));
+            //byte[] keyBytes = Files.readAllBytes(Paths.get("./resources/").resolve("pubKey2.der"));
+			String jarPath = new File(KeyHandler.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath()).getParentFile().getPath();
+			InputStream inputStream = new FileInputStream(new File(jarPath + "/resources/pubKey2.der"));
+            //InputStream inputStream = KeyHandler.class.getClassLoader().getResourceAsStream("pubKey2.der");
+            byte[] keyBytes = IOUtils.toByteArray(inputStream);
             
             // construct key response
             PEASHeader header = new PEASHeader();

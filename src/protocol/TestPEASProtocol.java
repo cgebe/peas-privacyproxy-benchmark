@@ -2,7 +2,6 @@ package protocol;
 
 import java.nio.charset.Charset;
 
-import io.netty.buffer.ByteBuf;
 
 import org.apache.commons.codec.binary.Base64;
 import org.json.simple.JSONObject;

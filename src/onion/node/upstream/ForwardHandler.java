@@ -1,7 +1,6 @@
 package onion.node.upstream;
 
 import onion.node.forward.upstream.ForwardChannelInitializer;
-import onion.node.forward.upstream.ReturnHandler;
 
 import org.apache.commons.codec.binary.Base64;
 
@@ -12,24 +11,24 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.SimpleChannelInboundHandler;
 
 public class ForwardHandler extends SimpleChannelInboundHandler<PEASMessage> {
 	
-	private NodeChannelInitializer initializer;
 	private Channel outboundChannel;
+	private NodeChannelState channelState;
 
-	public ForwardHandler(NodeChannelInitializer initializer) {
-		this.initializer = initializer;
+	public ForwardHandler(NodeChannelState channelState) {
+		this.channelState = channelState;
 	}
 
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, PEASMessage obj) throws Exception {
 		if (obj.getHeader().getForward() != null) {
-			String[] forward = new String(initializer.getAESdecipher().doFinal(Base64.decodeBase64(obj.getHeader().getForward()))).split("_");
+			System.out.println(obj.getHeader().getForward());
+			String[] forward = new String(channelState.getAESdecipher().doFinal(Base64.decodeBase64(obj.getHeader().getForward()))).split("_");
 			PEASHeader header = new PEASHeader();
 			// forward to next node
 			if (forward.length > 1) {
@@ -47,7 +46,7 @@ public class ForwardHandler extends SimpleChannelInboundHandler<PEASMessage> {
 			String[] address = forward[0].split(":");
 			
 			// body of forwarded msg
-			byte[] dec = initializer.getAESdecipher().doFinal(obj.getBody().getContent().array());
+			byte[] dec = channelState.getAESdecipher().doFinal(obj.getBody().getContent().array());
 			header.setContentLength(dec.length);
 			PEASBody body = new PEASBody(dec);
 			
@@ -59,7 +58,8 @@ public class ForwardHandler extends SimpleChannelInboundHandler<PEASMessage> {
 		        Bootstrap b = new Bootstrap();
 		        b.group(inboundChannel.eventLoop())
 		         .channel(ctx.channel().getClass())
-		         .handler(new ForwardChannelInitializer(inboundChannel, initializer.getAEScipher()));
+		         .handler(new ForwardChannelInitializer(inboundChannel, channelState))
+		         .option(ChannelOption.CONNECT_TIMEOUT_MILLIS , 500);
 		        
 		        ChannelFuture f = b.connect(address[0], Integer.parseInt(address[1]));
 	
@@ -76,7 +76,7 @@ public class ForwardHandler extends SimpleChannelInboundHandler<PEASMessage> {
 		    		            @Override
 		    		            public void operationComplete(ChannelFuture future) {
 		    		                if (future.isSuccess()) {
-
+		    		                	System.out.println("connected to next node");
 		    		                } else {
 		    		                	future.cause().printStackTrace();
 		    		                }

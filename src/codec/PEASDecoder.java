@@ -7,6 +7,7 @@ import protocol.PEASBody;
 import protocol.PEASHeader;
 import protocol.PEASMessage;
 import util.Config;
+import util.Observer;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufProcessor;
 import io.netty.channel.ChannelHandlerContext;
@@ -44,7 +45,7 @@ public class PEASDecoder extends ByteToMessageDecoder {
 
 	
     public PEASDecoder() {
-        this(4096, 8192, 8192, Charset.defaultCharset());
+        this(4096, 8192, 8000000, Charset.defaultCharset());
     }
 
     /**
@@ -129,7 +130,7 @@ public class PEASDecoder extends ByteToMessageDecoder {
 	    }
 	    case READ_CONTENT: {
 	        int readLimit = buffer.readableBytes();
-
+	        
 	        // Check if the buffer is readable first as we use the readable byte count
 	        // to write the PEASBody. This is needed as otherwise we may end up with
 	        // create a Body instance that contains an empty buffer and so is
@@ -144,7 +145,7 @@ public class PEASDecoder extends ByteToMessageDecoder {
 	        if (toRead > chunkSize) {
 	            toRead = (int) chunkSize;
 	        }
-	        ByteBuf content = buffer.readSlice(toRead).retain();
+	        ByteBuf content = buffer.readSlice(toRead);
 	        chunkSize -= toRead;
 	        if (chunkSize == 0) {
 	        	if (Config.getInstance().getValue("LOGGING").equals("on")) {
@@ -153,6 +154,9 @@ public class PEASDecoder extends ByteToMessageDecoder {
 	            // Read all content.
 	        	body.getContent().writeBytes(content);
 	            out.add(new PEASMessage(this.header, body));
+	            if (Config.getInstance().getValue("MEASURE_SERVER_STATS") != null && Config.getInstance().getValue("MEASURE_SERVER_STATS").equals("on")) {
+	            	Observer.getInstance().setRequestsIn(Observer.getInstance().getRequestsIn() + 1);
+	            }
 	            resetNow();
 	        } else {
 	        	if (Config.getInstance().getValue("LOGGING").equals("on")) {

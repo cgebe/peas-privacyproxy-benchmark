@@ -1,8 +1,6 @@
 package onion.node.upstream;
 
 import java.math.BigInteger;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
@@ -36,16 +34,15 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
 public class HandshakeHandler extends SimpleChannelInboundHandler<PEASMessage> {
 	
-	private NodeChannelInitializer initializer;
+	private NodeChannelState channelState;
 
-	public HandshakeHandler(NodeChannelInitializer initializer) {
-		this.initializer = initializer;
+	public HandshakeHandler(NodeChannelState channelState) {
+		this.channelState = channelState;
 	}
 
 	@Override
@@ -142,10 +139,10 @@ public class HandshakeHandler extends SimpleChannelInboundHandler<PEASMessage> {
         ByteBuf output;		
         if (input.capacity() <= 128) {
             // CASE 1: {responseBytes}_RSA
-            output = RSAdecrypt(initializer.getRSAdecipher(), input);
+            output = RSAdecrypt(channelState.getRSAdecipher(), input);
         } else {
             // CASE 2: {K | responseBytes_1}_RSA | {responseBytes2}_AES
-            ByteBuf firstPartDecrypted = RSAdecrypt(initializer.getRSAdecipher(), input.readBytes(128));
+            ByteBuf firstPartDecrypted = RSAdecrypt(channelState.getRSAdecipher(), input.readBytes(128));
 			// Extract the Symmetric Key
 	    	SecretKey key = extractSecretKey(firstPartDecrypted);
 
@@ -197,10 +194,10 @@ public class HandshakeHandler extends SimpleChannelInboundHandler<PEASMessage> {
         // Initiate AES cipher and decipher
         Cipher AEScipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         AEScipher.init(Cipher.ENCRYPT_MODE, symmetricKey, iv);
-        initializer.setAEScipher(AEScipher);
+        channelState.setAEScipher(AEScipher);
         Cipher AESdecipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         AESdecipher.init(Cipher.DECRYPT_MODE, symmetricKey, iv);
-        initializer.setAESdecipher(AESdecipher);
+        channelState.setAESdecipher(AESdecipher);
         
         byte[] keyBytes = ((DHPublicKey) Kpair.getPublic()).getY().toByteArray();
         return Unpooled.wrappedBuffer(keyBytes);

@@ -2,20 +2,17 @@ package onion.node.forward.upstream;
 
 import javax.crypto.Cipher;
 
-import protocol.PEASMessage;
+import onion.node.upstream.NodeChannelState;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.handler.codec.LineBasedFrameDecoder;
-import io.netty.handler.codec.string.StringDecoder;
-import io.netty.handler.codec.string.StringEncoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import receiver.handler.upstream.PEASPrinter;
 import util.Config;
-import codec.JSONDecoder;
-import codec.JSONEncoder;
+import util.InputWriter;
+import util.OutputWriter;
 import codec.PEASDecoder;
 import codec.PEASEncoder;
 
@@ -23,13 +20,12 @@ public class ForwardChannelInitializer extends ChannelInitializer<SocketChannel>
 	
 	private ChannelPipeline pipeline;
 	private Channel inboundChannel;
-	private PEASMessage obj;
-	private Cipher cipher;
+	private NodeChannelState channelState;
 	
-	public ForwardChannelInitializer(Channel inboundChannel, Cipher AEScipher) {
+	public ForwardChannelInitializer(Channel inboundChannel, NodeChannelState channelState) {
         this.inboundChannel = inboundChannel;
         //this.obj = toSend;
-        this.cipher = AEScipher;
+        this.channelState = channelState;
     }
 
 	@Override
@@ -38,7 +34,11 @@ public class ForwardChannelInitializer extends ChannelInitializer<SocketChannel>
 		
 		// Logging on?
 		if (Config.getInstance().getValue("LOGGING").equals("on")) {
-			pipeline.addLast(new LoggingHandler(LogLevel.INFO));
+			//pipeline.addLast(new LoggingHandler(LogLevel.INFO));
+		}
+		if (Config.getInstance().getValue("MEASURE_SERVER_STATS").equals("on")) {
+			pipeline.addLast("outputwriter", new InputWriter());
+			pipeline.addLast("inputwriter", new OutputWriter());
 		}
         pipeline.addLast("peasdecoder", new PEASDecoder());  // upstream 1
         pipeline.addLast("peasencoder", new PEASEncoder()); // downstream 1
@@ -46,7 +46,7 @@ public class ForwardChannelInitializer extends ChannelInitializer<SocketChannel>
         if (Config.getInstance().getValue("LOGGING").equals("on")) {
         	pipeline.addLast("peasprinter", new PEASPrinter()); // upstream 2
         }
-        pipeline.addLast("returner", new ReturnHandler(inboundChannel, cipher)); // upstream 3
+        pipeline.addLast("returner", new ReturnHandler(inboundChannel, channelState)); // upstream 3
 	}
 
 }

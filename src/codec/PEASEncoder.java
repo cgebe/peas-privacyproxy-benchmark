@@ -6,13 +6,19 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 import io.netty.handler.codec.MessageToMessageEncoder;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.util.List;
 
 import protocol.PEASMessage;
+import util.Config;
+import util.Observer;
 
-public class PEASEncoder extends MessageToByteEncoder<PEASMessage>{
+public class PEASEncoder extends MessageToMessageEncoder<PEASMessage>{
 	
 	 // TODO Use CharsetEncoder instead.
     private final Charset charset;
@@ -42,12 +48,24 @@ public class PEASEncoder extends MessageToByteEncoder<PEASMessage>{
      */
 
 	@Override
-	protected void encode(ChannelHandlerContext ctx, PEASMessage obj, ByteBuf out) throws Exception {
+	protected void encode(ChannelHandlerContext ctx, PEASMessage obj, List<Object> out) throws Exception {
 		// write header to downstream
-		out.writeBytes(ByteBufUtil.encodeString(ctx.alloc(), CharBuffer.wrap(obj.getHeader().toString()), charset));
+		out.add(ByteBufUtil.encodeString(ctx.alloc(), CharBuffer.wrap(obj.getHeader().toString()), charset));
 		// write body to downstream
-		out.writeBytes(obj.getBody().getContent());
+		out.add(obj.getBody().getContent());
 		// append line separator at the end of the body for framing
 		//out.writeBytes(ByteBufUtil.encodeString(ctx.alloc(), CharBuffer.wrap(System.lineSeparator()), charset));
+		if (Config.getInstance().getValue("MEASURE_PROCESS_TIME").equals("on")) {
+			//System.out.println((obj.getDestructionTime() - obj.getCreationTime()) / 1e6);
+			
+			String jarPath = new File(Config.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath()).getParentFile().getPath();
+			PrintWriter log = new PrintWriter(new BufferedWriter(new FileWriter(jarPath + "/" + "process.log", true)));
+			log.println((System.nanoTime() - obj.getCreationTime()) / 1e6);
+			log.close();
+		}
+		
+		if (Config.getInstance().getValue("MEASURE_SERVER_STATS") != null && Config.getInstance().getValue("MEASURE_SERVER_STATS").equals("on")) {
+        	Observer.getInstance().setRequestsOut(Observer.getInstance().getRequestsOut() + 1);
+        }
 	}
 }

@@ -6,19 +6,17 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-
-import org.apache.commons.codec.binary.Base64;
-
 import protocol.PEASBody;
 import protocol.PEASHeader;
 import protocol.PEASMessage;
+import util.Config;
 
 public class QueryHandler extends SimpleChannelInboundHandler<PEASMessage> {
 	
-	private NodeChannelInitializer initializer;
+	private NodeChannelState channelState;
 
-	public QueryHandler(NodeChannelInitializer initializer) {
-		this.initializer = initializer;
+	public QueryHandler(NodeChannelState channelState) {
+		this.channelState = channelState;
 	}
 
 	@Override
@@ -33,15 +31,15 @@ public class QueryHandler extends SimpleChannelInboundHandler<PEASMessage> {
 				header.setProtocol("HTTP");
 				
 				// body of forwarded msg
-				byte[] content = initializer.getAESdecipher().doFinal(obj.getBody().getContent().array());
+				byte[] content = channelState.getAESdecipher().doFinal(obj.getBody().getContent().array());
 				System.out.println("c: " + new String(content));
 				
 				// simulating request to search engine here
 				// normally open new socket to search engine/ make request
-				int size = 8000;
+				int size = Integer.parseInt(Config.getInstance().getValue("TEST_PAYLOAD_SIZE"));
 				byte[] b = new byte[size];
-				new Random().nextBytes(b);
-				byte[] enc = initializer.getAEScipher().doFinal(b);
+				//new Random().nextBytes(b);
+				byte[] enc = channelState.getAEScipher().doFinal(b);
 				
 				header.setContentLength(enc.length);
 				PEASBody body = new PEASBody(enc);

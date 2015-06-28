@@ -1,8 +1,10 @@
 package issuer.handler.upstream;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.util.Random;
 
 import javax.crypto.SecretKey;
@@ -10,10 +12,12 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
 
 import protocol.PEASBody;
 import protocol.PEASHeader;
 import protocol.PEASMessage;
+import util.Config;
 import util.Encryption;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -36,11 +40,15 @@ public class QueryHandler extends SimpleChannelInboundHandler<PEASMessage> {
 	private IvParameterSpec iv;
 	private SecretKey currentKey;
 
-	public QueryHandler() throws IOException {
+	public QueryHandler() throws IOException, URISyntaxException {
         byte[] ivBytes = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
         iv = new IvParameterSpec(ivBytes);
         
-        byte[] keyBytes = Files.readAllBytes(Paths.get("./resources/").resolve("privKey2.der"));
+        //byte[] keyBytes = Files.readAllBytes(Paths.get("./resources/").resolve("privKey2.der"));
+        String jarPath = new File(QueryHandler.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath()).getParentFile().getPath();
+        InputStream inputStream = new FileInputStream(new File(jarPath + "/resources/privKey2.der"));
+        //InputStream inputStream = QueryHandler.class.getClassLoader().getResourceAsStream("privKey2.der");
+        byte[] keyBytes = IOUtils.toByteArray(inputStream);
         AsymmetricKeyParameter privateKey = PrivateKeyFactory.createKey(keyBytes);
         
         RSAdecipher = new PKCS1Encoding(new RSAEngine());
@@ -56,8 +64,7 @@ public class QueryHandler extends SimpleChannelInboundHandler<PEASMessage> {
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, PEASMessage obj) throws Exception {
 		if (obj.getHeader().getCommand().equals("QUERY")) {
-			System.out.println("query received");
-			// TODO: decrypt query field and body, and dispatch http or forward to another issuer
+
 			String query = getQueryFromQueryField(obj.getHeader().getQuery());
 			System.out.println("q: " + query);
 			
@@ -65,7 +72,7 @@ public class QueryHandler extends SimpleChannelInboundHandler<PEASMessage> {
 			System.out.println("c: " + content);
 			
 			// simulate search engine request#
-			int size = 8000;
+			int size = Integer.parseInt(Config.getInstance().getValue("TEST_PAYLOAD_SIZE"));
 			PEASHeader header = new PEASHeader();
 			header.setCommand("RESPONSE");
 			header.setIssuer(obj.getHeader().getIssuer());
@@ -74,14 +81,16 @@ public class QueryHandler extends SimpleChannelInboundHandler<PEASMessage> {
 			header.setProtocol("HTTP");
 			
 			byte[] b = new byte[size];
-			new Random().nextBytes(b);
+			//new Random().nextBytes(b);
 			byte[] enc = Encryption.AESencrypt(b, currentKey, iv);
 			
 			header.setContentLength(enc.length);
 			PEASBody body = new PEASBody(enc);
 			
 			PEASMessage res = new PEASMessage(header, body);
-			
+			if (Config.getInstance().getValue("MEASURE_PROCESS_TIME").equals("on")) {
+				res.setCreationTime(obj.getCreationTime());
+			}
 			// send response back
             ChannelFuture f = ctx.writeAndFlush(res);
             
@@ -92,8 +101,8 @@ public class QueryHandler extends SimpleChannelInboundHandler<PEASMessage> {
                     	System.out.println("return query successful");
                     } else {
                         System.out.println("return query failed");
-                        future.channel().close();
                     }
+                    f.channel().close();
                 }
             });
 		}

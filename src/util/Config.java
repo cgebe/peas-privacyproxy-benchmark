@@ -1,7 +1,10 @@
 package util;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.util.Properties;
 
 import org.slf4j.Logger;
@@ -17,18 +20,17 @@ public class Config {
 	
 	
 	private Config () {
-		InputStream inputStream = Config.class.getClassLoader().getResourceAsStream(FILE);
- 
-		if (inputStream != null) {
-			try {
-				properties = new Properties();
-				properties.load(inputStream);
-			} catch (IOException e) {
-				logger.info("property file '" + FILE + "' is not following .properties file syntax");
-			}
-		} else {
-			logger.info("property file '" + FILE + "' not found in the classpath");
+		
+		try {
+			String jarPath = new File(Config.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath()).getParentFile().getPath();
+			InputStream inputStream = new FileInputStream(new File(jarPath + "/resources/config.properties"));
+			
+			properties = new Properties();
+			properties.load(inputStream);
+		} catch (IOException | URISyntaxException e) {
+			logger.info("property file '" + FILE + "' is not following .properties file syntax or not found");
 		}
+
 	}
 
 	public static Config getInstance () {

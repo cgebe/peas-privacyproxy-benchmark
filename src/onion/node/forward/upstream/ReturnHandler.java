@@ -3,6 +3,8 @@ package onion.node.forward.upstream;
 import javax.crypto.Cipher;
 
 
+
+import onion.node.upstream.NodeChannelState;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
@@ -15,11 +17,11 @@ import protocol.PEASMessage;
 public class ReturnHandler extends SimpleChannelInboundHandler<PEASMessage> {
 
 	private final Channel inboundChannel;
-	private Cipher cipher;
+	private NodeChannelState channelState;
 
-    public ReturnHandler(Channel inboundChannel, Cipher AEScipher) {
+    public ReturnHandler(Channel inboundChannel, NodeChannelState channelState) {
         this.inboundChannel = inboundChannel;
-        this.cipher = AEScipher;
+        this.channelState = channelState;
     }
 
     @Override
@@ -31,7 +33,7 @@ public class ReturnHandler extends SimpleChannelInboundHandler<PEASMessage> {
 	protected void channelRead0(ChannelHandlerContext ctx, PEASMessage toReturn) throws Exception {
 		toReturn.getHeader().setIssuer("ONION");
 		// encrypt the return msg
-		byte[] enc = cipher.doFinal(toReturn.getBody().getContent().array());
+		byte[] enc = channelState.getAEScipher().doFinal(toReturn.getBody().getContent().array());
 		// set new bodylength
 		toReturn.getHeader().setContentLength(enc.length);
 		PEASBody body = new PEASBody(enc);

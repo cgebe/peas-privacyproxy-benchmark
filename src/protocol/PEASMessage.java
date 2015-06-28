@@ -14,12 +14,14 @@ public class PEASMessage implements Serializable {
 	private static final long serialVersionUID = -8994528029805801398L;
 	private PEASHeader header;
 	private PEASBody body;
+	private long creationTime;
+	private long destructionTime;
 	
 	public PEASMessage(PEASHeader header, PEASBody body) {
 		this.header = header;
 		this.body = body;
+		this.setCreationTime(System.nanoTime());
 	}
-
 
 	public String toString() {
 		StringBuilder request = new StringBuilder();
@@ -67,5 +69,21 @@ public class PEASMessage implements Serializable {
 	
 	public void setBody(PEASBody body) {
 		this.body = body;
+	}
+
+	public long getCreationTime() {
+		return creationTime;
+	}
+
+	public void setCreationTime(long creationTime) {
+		this.creationTime = creationTime;
+	}
+
+	public long getDestructionTime() {
+		return destructionTime;
+	}
+
+	public void setDestructionTime(long destructionTime) {
+		this.destructionTime = destructionTime;
 	}
 }

@@ -26,13 +26,13 @@ public class ReturnHandler extends SimpleChannelInboundHandler<PEASMessage> {
         f.addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture future) {
-            	ctx.close();
-            	future.channel().close();
                 if (future.isSuccess()) {
                 	System.out.println("successful return");
                 } else {
                 	System.out.println("failed return");
                 }
+                ctx.close();
+            	f.channel().close();
             }
         });
 	}

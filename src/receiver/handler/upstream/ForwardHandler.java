@@ -8,11 +8,11 @@ import receiver.handler.forward.upstream.SingleSocketForwardChannelInitializer;
 import receiver.server.ReceiverServer;
 import util.Config;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.SimpleChannelInboundHandler;
 
 public class ForwardHandler extends SimpleChannelInboundHandler<PEASMessage> {
@@ -67,7 +67,7 @@ public class ForwardHandler extends SimpleChannelInboundHandler<PEASMessage> {
 		                	// TODO: normally send peas response with status code that issuer is not available
 	
 		                    // Close the connection if the connection attempt has failed.
-		                	System.out.println("not connected to next node");
+		                	System.out.println("not connected to issuerr");
 		                    inboundChannel.close();
 		                }
 		            }
@@ -81,7 +81,8 @@ public class ForwardHandler extends SimpleChannelInboundHandler<PEASMessage> {
 	        Bootstrap b = new Bootstrap();
 	        b.group(inboundChannel.eventLoop())
 	         .channel(ctx.channel().getClass())
-	         .handler(new ForwardChannelInitializer(inboundChannel));
+	         .handler(new ForwardChannelInitializer(inboundChannel))
+	         .option(ChannelOption.CONNECT_TIMEOUT_MILLIS , 500);
 	        
 	        ChannelFuture f = b.connect(obj.getHeader().getIssuerAddress(), obj.getHeader().getIssuerPort());
 	        Channel ch = f.channel();
