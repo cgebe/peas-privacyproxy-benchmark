@@ -18,7 +18,7 @@ import protocol.PEASMessage;
 import util.Config;
 import util.Observer;
 
-public class PEASEncoder extends MessageToMessageEncoder<PEASMessage>{
+public class PEASEncoder extends MessageToByteEncoder<PEASMessage>{
 	
 	 // TODO Use CharsetEncoder instead.
     private final Charset charset;
@@ -48,11 +48,11 @@ public class PEASEncoder extends MessageToMessageEncoder<PEASMessage>{
      */
 
 	@Override
-	protected void encode(ChannelHandlerContext ctx, PEASMessage obj, List<Object> out) throws Exception {
+	protected void encode(ChannelHandlerContext ctx, PEASMessage obj, ByteBuf out) throws Exception {
 		// write header to downstream
-		out.add(ByteBufUtil.encodeString(ctx.alloc(), CharBuffer.wrap(obj.getHeader().toString()), charset));
+		out.writeBytes(ByteBufUtil.encodeString(ctx.alloc(), CharBuffer.wrap(obj.getHeader().toString()), charset));
 		// write body to downstream
-		out.add(obj.getBody().getContent());
+		out.writeBytes(obj.getBody().getContent());
 		// append line separator at the end of the body for framing
 		//out.writeBytes(ByteBufUtil.encodeString(ctx.alloc(), CharBuffer.wrap(System.lineSeparator()), charset));
 		if (Config.getInstance().getValue("MEASURE_PROCESS_TIME").equals("on")) {
@@ -68,4 +68,6 @@ public class PEASEncoder extends MessageToMessageEncoder<PEASMessage>{
         	Observer.getInstance().setRequestsOut(Observer.getInstance().getRequestsOut() + 1);
         }
 	}
+
+
 }

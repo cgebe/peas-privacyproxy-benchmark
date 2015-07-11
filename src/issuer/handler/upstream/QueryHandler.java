@@ -32,6 +32,8 @@ import org.bouncycastle.crypto.engines.RSAEngine;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.util.PrivateKeyFactory;
 
+import com.squareup.crypto.rsa.NativeRSAEngine;
+
 public class QueryHandler extends SimpleChannelInboundHandler<PEASMessage> {
 
 
@@ -102,7 +104,7 @@ public class QueryHandler extends SimpleChannelInboundHandler<PEASMessage> {
                     } else {
                         System.out.println("return query failed");
                     }
-                    f.channel().close();
+                    ctx.close();
                 }
             });
 		}

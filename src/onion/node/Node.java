@@ -17,6 +17,8 @@ import org.bouncycastle.crypto.util.PrivateKeyFactory;
 
 
 
+
+
 import util.Config;
 import util.Observer;
 import io.netty.bootstrap.ServerBootstrap;
@@ -54,8 +56,8 @@ public class Node {
     }
 
     public void run() throws Exception {
-        EventLoopGroup bossGroup = new NioEventLoopGroup(1);
-        EventLoopGroup workerGroup = new NioEventLoopGroup(3);
+        EventLoopGroup bossGroup = new NioEventLoopGroup(Integer.parseInt(Config.getInstance().getValue("BOSS_CORES")));
+        EventLoopGroup workerGroup = new NioEventLoopGroup(Integer.parseInt(Config.getInstance().getValue("WORKER_CORES")));
         try {
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup)

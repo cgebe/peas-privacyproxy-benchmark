@@ -31,8 +31,8 @@ public class ReturnHandler extends SimpleChannelInboundHandler<PEASMessage> {
                 } else {
                 	System.out.println("failed return");
                 }
-                ctx.close();
-            	f.channel().close();
+                //ctx.close();
+                inboundChannel.close();
             }
         });
 	}

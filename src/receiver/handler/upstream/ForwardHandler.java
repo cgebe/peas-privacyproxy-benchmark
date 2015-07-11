@@ -105,6 +105,7 @@ public class ForwardHandler extends SimpleChannelInboundHandler<PEASMessage> {
 	    		            }
 	    		        });
 	                } else {
+	                	future.cause().printStackTrace();
 	                	// TODO: normally send peas response with status code that issuer is not available
 
 	                    // Close the connection if the connection attempt has failed.

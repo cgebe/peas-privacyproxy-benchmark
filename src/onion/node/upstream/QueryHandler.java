@@ -54,8 +54,8 @@ public class QueryHandler extends SimpleChannelInboundHandler<PEASMessage> {
 	                    	System.out.println("return query successful");
 	                    } else {
 	                        System.out.println("return query failed");
-	                        future.channel().close();
 	                    }
+	                    ctx.close();
 	                }
 	            });
 				
