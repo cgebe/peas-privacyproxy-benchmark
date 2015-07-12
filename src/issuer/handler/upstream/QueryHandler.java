@@ -104,7 +104,9 @@ public class QueryHandler extends SimpleChannelInboundHandler<PEASMessage> {
                     } else {
                         System.out.println("return query failed");
                     }
-                    ctx.close();
+                    if (!Config.getInstance().getValue("SINGLE_SOCKET").equals("on")) {
+        				ctx.close();
+        			}
                 }
             });
 		}

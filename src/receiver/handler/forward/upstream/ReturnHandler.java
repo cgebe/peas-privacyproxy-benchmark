@@ -22,6 +22,7 @@ public class ReturnHandler extends SimpleChannelInboundHandler<PEASMessage> {
 
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, PEASMessage toReturn) throws Exception {
+        ctx.close();
         ChannelFuture f = inboundChannel.writeAndFlush(toReturn);
         f.addListener(new ChannelFutureListener() {
             @Override
@@ -31,7 +32,6 @@ public class ReturnHandler extends SimpleChannelInboundHandler<PEASMessage> {
                 } else {
                 	System.out.println("failed return");
                 }
-                //ctx.close();
                 inboundChannel.close();
             }
         });

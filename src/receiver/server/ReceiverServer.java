@@ -1,5 +1,6 @@
 package receiver.server;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
@@ -31,8 +32,8 @@ public class ReceiverServer {
     public ReceiverServer(int port) {
         this.port = port;
         if (Config.getInstance().getValue("SINGLE_SOCKET").equals("on")) {
-        	this.setIssuers(new ConcurrentHashMap<String, Channel>());
-        	this.setClients(new ConcurrentHashMap<String, Channel>());
+        	this.setIssuers(new HashMap<String, Channel>());
+        	this.setClients(new HashMap<String, Channel>());
         }
         if (Config.getInstance().getValue("MEASURE_SERVER_STATS").equals("on")) {
         	executor.execute(new StatsWriter());
@@ -42,6 +43,8 @@ public class ReceiverServer {
     public void run() throws Exception {
         EventLoopGroup bossGroup = new NioEventLoopGroup(Integer.parseInt(Config.getInstance().getValue("BOSS_CORES")));
         EventLoopGroup workerGroup = new NioEventLoopGroup(Integer.parseInt(Config.getInstance().getValue("WORKER_CORES")));
+        //EventLoopGroup bossGroup = new NioEventLoopGroup(); 
+        //EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup)
@@ -70,19 +73,19 @@ public class ReceiverServer {
     	new ReceiverServer(11777).run();
     }
 
-	public synchronized Map<String, Channel> getIssuers() {
+	public Map<String, Channel> getIssuers() {
 		return issuers;
 	}
 
-	public synchronized void setIssuers(Map<String, Channel> issuers) {
+	public void setIssuers(Map<String, Channel> issuers) {
 		this.issuers = issuers;
 	}
 
-	public synchronized Map<String, Channel> getClients() {
+	public Map<String, Channel> getClients() {
 		return clients;
 	}
 
-	public synchronized void setClients(Map<String, Channel> clients) {
+	public void setClients(Map<String, Channel> clients) {
 		this.clients = clients;
 	}
 	

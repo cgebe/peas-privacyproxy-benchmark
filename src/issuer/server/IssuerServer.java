@@ -31,14 +31,16 @@ public class IssuerServer {
     }
 
     public void run() throws Exception {
+    	System.out.println(Runtime.getRuntime().availableProcessors());
         EventLoopGroup bossGroup = new NioEventLoopGroup(Integer.parseInt(Config.getInstance().getValue("BOSS_CORES"))); 
         EventLoopGroup workerGroup = new NioEventLoopGroup(Integer.parseInt(Config.getInstance().getValue("WORKER_CORES")));
+        //EventLoopGroup bossGroup = new NioEventLoopGroup(); 
+        //EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
             ServerBootstrap b = new ServerBootstrap(); 
             b.group(bossGroup, workerGroup)
              .channel(NioServerSocketChannel.class) 
-             .childHandler(new IssuerChannelInitializer())
-             .option(ChannelOption.SO_BACKLOG, 2000);
+             .childHandler(new IssuerChannelInitializer());
             
     		// Logging on?
     		if (Config.getInstance().getValue("LOGGING").equals("on")) {
