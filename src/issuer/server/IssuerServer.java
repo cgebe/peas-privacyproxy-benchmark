@@ -13,6 +13,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import io.netty.util.ResourceLeakDetector;
 import issuer.handler.upstream.IssuerChannelInitializer;
 
 /**
@@ -28,6 +29,8 @@ public class IssuerServer {
         if (Config.getInstance().getValue("MEASURE_SERVER_STATS").equals("on")) {
         	executor.execute(new StatsWriter());
         }
+        
+        ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.ADVANCED);
     }
 
     public void run() throws Exception {

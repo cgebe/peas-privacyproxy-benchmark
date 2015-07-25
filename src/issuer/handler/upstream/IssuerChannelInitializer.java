@@ -11,6 +11,7 @@ import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import io.netty.util.concurrent.DefaultEventExecutorGroup;
 
 public class IssuerChannelInitializer extends ChannelInitializer<SocketChannel> {
 	
@@ -18,6 +19,7 @@ public class IssuerChannelInitializer extends ChannelInitializer<SocketChannel> 
 	@Override
 	protected void initChannel(SocketChannel ch) throws Exception {
 		ChannelPipeline pipeline = ch.pipeline();
+	
 		
 		// Logging on?
 		if (Config.getInstance().getValue("LOGGING").equals("on")) {
@@ -36,6 +38,7 @@ public class IssuerChannelInitializer extends ChannelInitializer<SocketChannel> 
         }
         //pipeline.addLast("keyhandler", new KeyHandler()); // upstream 3
         pipeline.addLast("queryhandler", new QueryHandler()); // upstream 4
+
         
         // TODO
         //pipeline.addLast("dispatcher", new DispatchHandler());

@@ -24,7 +24,7 @@ public class SingleSocketReturnHandler extends SimpleChannelInboundHandler<PEASM
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, PEASMessage toReturn) throws Exception {
 		Channel ret = server.getClients().remove(toReturn.getHeader().getReceiverID());
-
+		
         ChannelFuture f = ret.writeAndFlush(toReturn);
         f.addListener(new ChannelFutureListener() {
             @Override
@@ -33,14 +33,16 @@ public class SingleSocketReturnHandler extends SimpleChannelInboundHandler<PEASM
             	//Channel ch = server.getClients().remove(toReturn.getHeader().getReceiverID());
                 if (future.isSuccess()) {
                 	System.out.println("successful return");
+                	ret.close();
                 } else {
                 	System.out.println("failed return");
-                    
+                	ret.close();
                 }
-                ret.close();
+                
             }
         });
 	}
+
 
 
 }

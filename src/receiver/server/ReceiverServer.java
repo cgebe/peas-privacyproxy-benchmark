@@ -32,8 +32,8 @@ public class ReceiverServer {
     public ReceiverServer(int port) {
         this.port = port;
         if (Config.getInstance().getValue("SINGLE_SOCKET").equals("on")) {
-        	this.setIssuers(new HashMap<String, Channel>());
-        	this.setClients(new HashMap<String, Channel>());
+        	this.setIssuers(new ConcurrentHashMap<String, Channel>());
+        	this.setClients(new ConcurrentHashMap<String, Channel>());
         }
         if (Config.getInstance().getValue("MEASURE_SERVER_STATS").equals("on")) {
         	executor.execute(new StatsWriter());

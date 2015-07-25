@@ -28,10 +28,14 @@ public class ForwardHandler extends SimpleChannelInboundHandler<PEASMessage> {
 		Channel inboundChannel = ctx.channel();
 		
 		if (Config.getInstance().getValue("SINGLE_SOCKET").equals("on")) {
+			
 			// Generate id for this client/peas request
-			String id = randomID(32);
-			obj.getHeader().setReceiverID(id);
+			String id;
+			do {
+				id = randomID(32);
+			} while (server.getClients().get(id) != null);
 			server.getClients().put(id, inboundChannel);
+			obj.getHeader().setReceiverID(id);
 			
 			if (server.getIssuers().get(obj.getHeader().getIssuer()) == null) {
 		        // Start the connection attempt.
@@ -101,6 +105,7 @@ public class ForwardHandler extends SimpleChannelInboundHandler<PEASMessage> {
 
 	    		                } else {
 	    		                	future.cause().printStackTrace();
+	    		                	inboundChannel.close();
 	    		                }
 	    		            }
 	    		        });
@@ -121,9 +126,14 @@ public class ForwardHandler extends SimpleChannelInboundHandler<PEASMessage> {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         cause.printStackTrace();
-        //closeOnFlush(ctx.channel());
+        ctx.close();
     }
     
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+    	super.channelInactive(ctx);
+    	System.out.println("inactive");
+    }
 
 	static final String AB = "0123456789abcdefghijklmnopqrstuvwxyz";							
 	static Random rnd = new Random();
