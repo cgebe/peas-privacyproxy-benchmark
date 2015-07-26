@@ -34,7 +34,7 @@ public class IssuerServer {
     }
 
     public void run() throws Exception {
-    	System.out.println(Runtime.getRuntime().availableProcessors());
+    	//System.out.println(Runtime.getRuntime().availableProcessors());
         EventLoopGroup bossGroup = new NioEventLoopGroup(Integer.parseInt(Config.getInstance().getValue("BOSS_CORES"))); 
         EventLoopGroup workerGroup = new NioEventLoopGroup(Integer.parseInt(Config.getInstance().getValue("WORKER_CORES")));
         //EventLoopGroup bossGroup = new NioEventLoopGroup(); 
@@ -47,7 +47,7 @@ public class IssuerServer {
             
     		// Logging on?
     		if (Config.getInstance().getValue("LOGGING").equals("on")) {
-    			b.handler(new LoggingHandler(LogLevel.INFO));
+    			//b.handler(new LoggingHandler(LogLevel.INFO));
     		}
 
             // Bind and start to accept incoming connections.

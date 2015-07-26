@@ -1,9 +1,10 @@
 package receiver.handler.forward.upstream;
 
-import receiver.handler.upstream.PEASPrinter;
 import util.Config;
 import util.InputWriter;
 import util.OutputWriter;
+import util.PEASPrinterIn;
+import util.PEASPrinterOut;
 import codec.PEASDecoder;
 import codec.PEASEncoder;
 import io.netty.channel.Channel;
@@ -37,7 +38,8 @@ public class ForwardChannelInitializer extends ChannelInitializer<SocketChannel>
         pipeline.addLast("peasencoder", new PEASEncoder()); // downstream 1
         
         if (Config.getInstance().getValue("LOGGING").equals("on")) {
-        	pipeline.addLast("peasprinter", new PEASPrinter()); // upstream 2
+        	pipeline.addLast("peasprinterin", new PEASPrinterIn()); // upstream 2
+        	pipeline.addLast("peasprinterout", new PEASPrinterOut()); // downstream 1
         }
         pipeline.addLast("returner", new ReturnHandler(inboundChannel)); // upstream 3
 	}

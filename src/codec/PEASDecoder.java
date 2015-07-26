@@ -137,7 +137,6 @@ public class PEASDecoder extends ByteToMessageDecoder {
 	        // handled like it is the last one.
 
 	        if (readLimit == 0) {
-	        	System.out.println("ret 0");
 	            return;
 	        }
 	
@@ -149,7 +148,7 @@ public class PEASDecoder extends ByteToMessageDecoder {
 	        chunkSize -= toRead;
 	        if (chunkSize == 0) {
 	        	if (Config.getInstance().getValue("LOGGING").equals("on")) {
-	        		System.err.println("Decoder: whole msg received");
+	        		//System.err.println("Decoder: whole msg received");
 	        	}
 	            // Read all content.
 	        	body.getContent().writeBytes(content);
@@ -160,7 +159,7 @@ public class PEASDecoder extends ByteToMessageDecoder {
 	            resetNow();
 	        } else {
 	        	if (Config.getInstance().getValue("LOGGING").equals("on")) {
-	        		System.err.println("Decoder: partially msg received");
+	        		//System.err.println("Decoder: partially msg received");
 	        	}
 	        	body.getContent().writeBytes(content);
 	        }

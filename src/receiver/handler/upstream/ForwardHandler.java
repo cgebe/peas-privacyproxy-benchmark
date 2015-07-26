@@ -53,7 +53,7 @@ public class ForwardHandler extends SimpleChannelInboundHandler<PEASMessage> {
 		            @Override
 		            public void operationComplete(ChannelFuture future) {
 		                if (future.isSuccess()) {
-		                	System.out.println("connected to issuer");
+		                	System.out.println("Connection To Issuer Established");
 		                	ChannelFuture f = ch.writeAndFlush(obj);
 		                	
 		                	f.addListener(new ChannelFutureListener() {
@@ -71,7 +71,7 @@ public class ForwardHandler extends SimpleChannelInboundHandler<PEASMessage> {
 		                	// TODO: normally send peas response with status code that issuer is not available
 	
 		                    // Close the connection if the connection attempt has failed.
-		                	System.out.println("not connected to issuerr");
+		                	System.out.println("Connection To Issuer Failed");
 		                    inboundChannel.close();
 		                }
 		            }
@@ -95,7 +95,7 @@ public class ForwardHandler extends SimpleChannelInboundHandler<PEASMessage> {
 	            @Override
 	            public void operationComplete(ChannelFuture future) {
 	                if (future.isSuccess()) {
-	                	System.out.println("connected to issuer");
+	                	System.out.println("Connection To Issuer Established");
 	                	ChannelFuture f = ch.writeAndFlush(obj);
 	                	
 	                	f.addListener(new ChannelFutureListener() {
@@ -114,7 +114,7 @@ public class ForwardHandler extends SimpleChannelInboundHandler<PEASMessage> {
 	                	// TODO: normally send peas response with status code that issuer is not available
 
 	                    // Close the connection if the connection attempt has failed.
-	                	System.out.println("not connected to issuer");
+	                	System.out.println("Connection To Issuer Failed");
 	                    inboundChannel.close();
 	                }
 	            }
@@ -132,7 +132,7 @@ public class ForwardHandler extends SimpleChannelInboundHandler<PEASMessage> {
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
     	super.channelInactive(ctx);
-    	System.out.println("inactive");
+    	//System.out.println("inactive");
     }
 
 	static final String AB = "0123456789abcdefghijklmnopqrstuvwxyz";							

@@ -27,21 +27,19 @@ public class ForwardHandler extends SimpleChannelInboundHandler<PEASMessage> {
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, PEASMessage obj) throws Exception {
 		if (obj.getHeader().getForward() != null) {
-			System.out.println(obj.getHeader().getForward());
 			String[] forward = new String(channelState.getAESdecipher().doFinal(Base64.decodeBase64(obj.getHeader().getForward()))).split("_");
 			PEASHeader header = new PEASHeader();
 			// forward to next node
 			if (forward.length > 1) {
-				System.out.println("0: " + forward[0]);
-				System.out.println("1: " + forward[1]);
 				header.setForward(forward[1]);
 			} else {
-				System.out.println("0: " + forward[0]);
 				header.setForward(null);
 			}
 			
 			header.setCommand(obj.getHeader().getCommand());
-			header.setQuery(obj.getHeader().getQuery());
+			if (obj.getHeader().getCommand().equals("QUERY")) {
+				header.setQuery(Base64.encodeBase64String(channelState.getAESdecipher().doFinal(Base64.decodeBase64(obj.getHeader().getQuery()))));
+			}
 			header.setIssuer("ONION");
 			String[] address = forward[0].split(":");
 			
@@ -76,7 +74,7 @@ public class ForwardHandler extends SimpleChannelInboundHandler<PEASMessage> {
 		    		            @Override
 		    		            public void operationComplete(ChannelFuture future) {
 		    		                if (future.isSuccess()) {
-		    		                	System.out.println("connected to next node");
+		    		                	//System.out.println("Connection To Next Node Established");
 		    		                } else {
 		    		                	future.cause().printStackTrace();
 		    		                }
@@ -86,7 +84,7 @@ public class ForwardHandler extends SimpleChannelInboundHandler<PEASMessage> {
 		                	// TODO: normally send peas response with status code that issuer is not available
 	
 		                    // Close the connection if the connection attempt has failed.
-		                	System.out.println("not connected to next node");
+		                	//System.out.println("Connection To Next Node Failed");
 		                    inboundChannel.close();
 		                }
 		            }

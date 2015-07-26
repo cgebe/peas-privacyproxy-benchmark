@@ -2,6 +2,8 @@ package onion.node.upstream;
 
 import java.util.Random;
 
+import org.apache.commons.codec.binary.Base64;
+
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -27,12 +29,16 @@ public class QueryHandler extends SimpleChannelInboundHandler<PEASMessage> {
 				PEASHeader header = new PEASHeader();
 				header.setCommand("RESPONSE");
 				header.setStatus("100");
-				header.setIssuer("NULL");
+				header.setIssuer("ONION");
 				header.setProtocol("HTTP");
 				
+				System.out.println("query:");
+				System.out.println(new String(channelState.getAESdecipher().doFinal(Base64.decodeBase64(obj.getHeader().getQuery()))));
+				System.out.println();
 				// body of forwarded msg
 				byte[] content = channelState.getAESdecipher().doFinal(obj.getBody().getContent().array());
-				System.out.println("c: " + new String(content));
+				System.out.println("content:");
+				System.out.println(new String(content));
 				
 				// simulating request to search engine here
 				// normally open new socket to search engine/ make request
@@ -51,9 +57,9 @@ public class QueryHandler extends SimpleChannelInboundHandler<PEASMessage> {
 	                @Override
 	                public void operationComplete(ChannelFuture future) {
 	                    if (future.isSuccess()) {
-	                    	System.out.println("return query successful");
+	                    	//System.out.println("return query successful");
 	                    } else {
-	                        System.out.println("return query failed");
+	                        //System.out.println("return query failed");
 	                    }
 	                    ctx.close();
 	                }

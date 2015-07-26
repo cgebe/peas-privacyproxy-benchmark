@@ -70,9 +70,9 @@ public class HandshakeHandler extends SimpleChannelInboundHandler<PEASMessage> {
 	                @Override
 	                public void operationComplete(ChannelFuture future) {
 	                    if (future.isSuccess()) {
-	                    	System.out.println("return handshake successful");
+	                    	//System.out.println("return handshake successful");
 	                    } else {
-	                        System.out.println("return handshake failed");
+	                        //System.out.println("return handshake failed");
 	                        future.channel().close();
 	                    }
 	                }
@@ -190,7 +190,7 @@ public class HandshakeHandler extends SimpleChannelInboundHandler<PEASMessage> {
         KeyAgree.doPhase(clientPubKey, true);
         byte[] sharedSecret = KeyAgree.generateSecret();
         SecretKey symmetricKey = new SecretKeySpec(sharedSecret, 0, 16, "AES");
-        System.out.println("skn " + Encryption.bytesToHex(symmetricKey.getEncoded()));
+        System.out.println("Key For This Node: " + Encryption.bytesToHex(symmetricKey.getEncoded()));
         // Initiate AES cipher and decipher
         Cipher AEScipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         AEScipher.init(Cipher.ENCRYPT_MODE, symmetricKey, iv);

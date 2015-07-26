@@ -44,9 +44,9 @@ public class ReturnHandler extends SimpleChannelInboundHandler<PEASMessage> {
             @Override
             public void operationComplete(ChannelFuture future) {
                 if (future.isSuccess()) {
-                	System.out.println("successful return");
+                	//System.out.println("successful return");
                 } else {
-                	System.out.println("failed return");
+                	//System.out.println("failed return");
                     inboundChannel.close();
                 }
             }

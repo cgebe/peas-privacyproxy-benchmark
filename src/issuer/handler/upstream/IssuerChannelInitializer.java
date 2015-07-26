@@ -1,9 +1,10 @@
 package issuer.handler.upstream;
 
-import receiver.handler.upstream.PEASPrinter;
 import util.Config;
 import util.InputWriter;
 import util.OutputWriter;
+import util.PEASPrinterIn;
+import util.PEASPrinterOut;
 import codec.PEASDecoder;
 import codec.PEASEncoder;
 import io.netty.channel.ChannelInitializer;
@@ -34,7 +35,8 @@ public class IssuerChannelInitializer extends ChannelInitializer<SocketChannel> 
         pipeline.addLast("peasencoder", new PEASEncoder()); // downstream 1
         
         if (Config.getInstance().getValue("LOGGING").equals("on")) {
-        	pipeline.addLast("peasprinter", new PEASPrinter());
+        	pipeline.addLast("peasprinterin", new PEASPrinterIn()); // upstream 2
+        	pipeline.addLast("peasprinterout", new PEASPrinterOut()); // downstream 1
         }
         //pipeline.addLast("keyhandler", new KeyHandler()); // upstream 3
         pipeline.addLast("queryhandler", new QueryHandler()); // upstream 4

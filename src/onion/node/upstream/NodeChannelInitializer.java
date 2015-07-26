@@ -5,10 +5,11 @@ package onion.node.upstream;
 
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 
-import receiver.handler.upstream.PEASPrinter;
 import util.Config;
 import util.InputWriter;
 import util.OutputWriter;
+import util.PEASPrinterIn;
+import util.PEASPrinterOut;
 import io.netty.channel.Channel;
 import codec.PEASDecoder;
 import codec.PEASEncoder;
@@ -26,8 +27,6 @@ public class NodeChannelInitializer extends ChannelInitializer<SocketChannel> {
 
 	@Override
 	protected void initChannel(SocketChannel ch) throws Exception {
-		System.out.println(ch.metadata().toString());
-		
 		NodeChannelState channelState = new NodeChannelState(key);
 		
 		ChannelPipeline pipeline = ch.pipeline();
@@ -44,7 +43,8 @@ public class NodeChannelInitializer extends ChannelInitializer<SocketChannel> {
         pipeline.addLast("peasencoder", new PEASEncoder()); // downstream 1
         
         if (Config.getInstance().getValue("LOGGING").equals("on")) {
-        	pipeline.addLast("peasprinter", new PEASPrinter()); // upstream 2
+        	pipeline.addLast("peasprinterin", new PEASPrinterIn()); // upstream 2
+        	pipeline.addLast("peasprinterout", new PEASPrinterOut()); // downstream 1
         }
         pipeline.addLast("forwarder", new ForwardHandler(channelState)); // upstream 3
         pipeline.addLast("handshakehandler", new HandshakeHandler(channelState)); // upstream 4

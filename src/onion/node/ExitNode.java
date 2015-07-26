@@ -1,43 +1,58 @@
-package receiver.server;
+package onion.node;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import receiver.handler.upstream.ReceiverChannelInitializer;
+import onion.node.upstream.NodeChannelInitializer;
+
+import org.apache.commons.io.IOUtils;
+import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
+import org.bouncycastle.crypto.util.PrivateKeyFactory;
+
+
+
+
+
 import util.Config;
 import util.Observer;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
+
 
 /**
  * Discards any incoming data.
  */
-public class ReceiverServer {
+public class ExitNode {
 
     private int port;
-    private Map<String, Channel> issuers;
-    private Map<String, Channel> clients;
-    private Executor executor = Executors.newSingleThreadExecutor();
+	private AsymmetricKeyParameter privateKey;
+	private Executor executor = Executors.newSingleThreadExecutor();
 
-    public ReceiverServer(int port) {
+    public ExitNode(int port) throws IOException, URISyntaxException {
         this.port = port;
-        if (Config.getInstance().getValue("SINGLE_SOCKET").equals("on")) {
-        	this.setIssuers(new ConcurrentHashMap<String, Channel>());
-        	this.setClients(new ConcurrentHashMap<String, Channel>());
-        }
+        
         if (Config.getInstance().getValue("MEASURE_SERVER_STATS").equals("on")) {
         	executor.execute(new StatsWriter());
         }
+        
+		//byte[] keyBytes = Files.readAllBytes(Paths.get("./resources/").resolve("privKey2.der"));
+		//privateKey  = PrivateKeyFactory.createKey(keyBytes);
+        String jarPath = new File(ExitNode.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath()).getParentFile().getPath();
+        InputStream inputStream = new FileInputStream(new File(jarPath + "/resources/privKey2.der"));
+        //InputStream inputStream = Node.class.getClassLoader().getResourceAsStream("privKey2.der");
+        byte[] keyBytes = IOUtils.toByteArray(inputStream);
+        
+        privateKey  = PrivateKeyFactory.createKey(keyBytes);
     }
 
     public void run() throws Exception {
@@ -49,13 +64,11 @@ public class ReceiverServer {
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup)
              .channel(NioServerSocketChannel.class)
-             .childHandler(new ReceiverChannelInitializer(this))
+             .childHandler(new NodeChannelInitializer(privateKey))
              .option(ChannelOption.SO_BACKLOG, 2000);
-
-    		// Logging on?
-    		if (Config.getInstance().getValue("LOGGING").equals("on")) {
-    			//b.handler(new LoggingHandler(LogLevel.INFO));
-    		}
+             //.option(ChannelOption.SO_BACKLOG, 128);        
+             //.childOption(ChannelOption.AUTO_READ, true)
+             //.childOption(ChannelOption.SO_KEEPALIVE, true); 
 
             // Bind and start to accept incoming connections.
             ChannelFuture f = b.bind(port).sync(); 
@@ -70,26 +83,10 @@ public class ReceiverServer {
 
     public static void main(String[] args) throws Exception {
         //new RecieverServer(Integer.parseInt(Config.getInstance().getValue("port"))).run();
-    	new ReceiverServer(11777).run();
+    	new ExitNode(12346).run();
     }
-
-	public Map<String, Channel> getIssuers() {
-		return issuers;
-	}
-
-	public void setIssuers(Map<String, Channel> issuers) {
-		this.issuers = issuers;
-	}
-
-	public Map<String, Channel> getClients() {
-		return clients;
-	}
-
-	public void setClients(Map<String, Channel> clients) {
-		this.clients = clients;
-	}
-	
-	private class StatsWriter implements Runnable {
+    
+    private class StatsWriter implements Runnable {
 
         private long interval;
 

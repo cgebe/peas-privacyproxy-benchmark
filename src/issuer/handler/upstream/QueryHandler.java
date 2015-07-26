@@ -78,10 +78,13 @@ public class QueryHandler extends SimpleChannelInboundHandler<PEASMessage> {
 				executor.execute(queryHandler);
 			} else {
 				Pair<SecretKey, String> keyAndQery = getSecretKeyAndQueryFromQueryField(obj.getHeader().getQuery());
-				System.out.println("q: " + keyAndQery.getElement1());
+				System.out.println("query:");
+				System.out.println(keyAndQery.getElement1());
+				System.out.println();
 				
 				String content = new String(Encryption.AESdecrypt(obj.getBody().getContent().array(), keyAndQery.getElement0(), iv));
-				System.out.println("c: " + content);
+				System.out.println("content:");
+				System.out.println(content);
 				
 				// simulate search engine request#
 				int size = Integer.parseInt(Config.getInstance().getValue("TEST_PAYLOAD_SIZE"));
@@ -110,9 +113,9 @@ public class QueryHandler extends SimpleChannelInboundHandler<PEASMessage> {
 	                @Override
 	                public void operationComplete(ChannelFuture future) {
 	                    if (future.isSuccess()) {
-	                    	System.out.println("return query successful");
+	                    	//System.out.println("return query successful");
 	                    } else {
-	                        System.out.println("return query failed");
+	                        //System.out.println("return query failed");
 	                    }
 	        			ctx.close();
 	                }
@@ -187,10 +190,13 @@ public class QueryHandler extends SimpleChannelInboundHandler<PEASMessage> {
         	Pair<SecretKey, String> keyAndQery;
 			try {
 				keyAndQery = getSecretKeyAndQueryFromQueryField(obj.getHeader().getQuery());
-				System.out.println("q: " + keyAndQery.getElement1());
+				System.out.println("query:");
+				System.out.println(keyAndQery.getElement1());
+				System.out.println();
 				
 				String content = new String(Encryption.AESdecrypt(obj.getBody().getContent().array(), keyAndQery.getElement0(), iv));
-				System.out.println("c: " + content);
+				System.out.println("content:");
+				System.out.println(content);
 				
 				// simulate search engine request#
 				int size = Integer.parseInt(Config.getInstance().getValue("TEST_PAYLOAD_SIZE"));
@@ -219,9 +225,9 @@ public class QueryHandler extends SimpleChannelInboundHandler<PEASMessage> {
 	                @Override
 	                public void operationComplete(ChannelFuture future) {
 	                    if (future.isSuccess()) {
-	                    	System.out.println("return query successful");
+	                    	//System.out.println("return query successful");
 	                    } else {
-	                        System.out.println("return query failed");
+	                        //System.out.println("return query failed");
 	                    }
 	                }
 	            });

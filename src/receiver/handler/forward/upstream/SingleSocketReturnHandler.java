@@ -32,10 +32,10 @@ public class SingleSocketReturnHandler extends SimpleChannelInboundHandler<PEASM
             	//server.getClients().get(toReturn.getHeader().getReceiverID()).close();
             	//Channel ch = server.getClients().remove(toReturn.getHeader().getReceiverID());
                 if (future.isSuccess()) {
-                	System.out.println("successful return");
+                	//System.out.println("successful return");
                 	ret.close();
                 } else {
-                	System.out.println("failed return");
+                	//System.out.println("failed return");
                 	ret.close();
                 }
                 

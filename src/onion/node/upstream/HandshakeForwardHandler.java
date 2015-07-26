@@ -64,12 +64,12 @@ public class HandshakeForwardHandler extends SimpleChannelInboundHandler<PEASMes
 		            @Override
 		            public void operationComplete(ChannelFuture future) {
 		                if (future.isSuccess()) {
-		                	System.out.println("connected to next node");
+		                	//System.out.println("Connection To Next Node Established");
 		                } else {
 		                	// TODO: normally send peas response with status code that issuer is not available
 
 		                    // Close the connection if the connection attempt has failed.
-		                	System.out.println("not connected to next node");
+		                	//System.out.println("Connection To Next Node Failed");
 		                    inboundChannel.close();
 		                }
 		            }
