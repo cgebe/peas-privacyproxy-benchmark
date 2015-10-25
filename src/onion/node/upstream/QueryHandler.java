@@ -1,9 +1,7 @@
 package onion.node.upstream;
 
-import java.util.Random;
 
 import org.apache.commons.codec.binary.Base64;
-
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;

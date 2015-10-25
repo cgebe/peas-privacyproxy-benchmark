@@ -10,7 +10,6 @@ import util.InputWriter;
 import util.OutputWriter;
 import util.PEASPrinterIn;
 import util.PEASPrinterOut;
-import io.netty.channel.Channel;
 import codec.PEASDecoder;
 import codec.PEASEncoder;
 import io.netty.channel.ChannelInitializer;

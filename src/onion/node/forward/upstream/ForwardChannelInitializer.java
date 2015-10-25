@@ -1,14 +1,11 @@
 package onion.node.forward.upstream;
 
-import javax.crypto.Cipher;
 
 import onion.node.upstream.NodeChannelState;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
 import util.Config;
 import util.InputWriter;
 import util.OutputWriter;

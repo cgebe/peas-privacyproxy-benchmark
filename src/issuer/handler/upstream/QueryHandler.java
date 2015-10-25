@@ -27,15 +27,12 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.util.ReferenceCountUtil;
 
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.encodings.PKCS1Encoding;
 import org.bouncycastle.crypto.engines.RSAEngine;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.util.PrivateKeyFactory;
-
-import com.squareup.crypto.rsa.NativeRSAEngine;
 
 public class QueryHandler extends SimpleChannelInboundHandler<PEASMessage> {
 
@@ -78,14 +75,8 @@ public class QueryHandler extends SimpleChannelInboundHandler<PEASMessage> {
 				executor.execute(queryHandler);
 			} else {
 				Pair<SecretKey, String> keyAndQery = getSecretKeyAndQueryFromQueryField(obj.getHeader().getQuery());
-				System.out.println("query:");
-				System.out.println(keyAndQery.getElement1());
-				System.out.println();
-				
 				String content = new String(Encryption.AESdecrypt(obj.getBody().getContent().array(), keyAndQery.getElement0(), iv));
-				System.out.println("content:");
 				System.out.println(content);
-				
 				// simulate search engine request#
 				int size = Integer.parseInt(Config.getInstance().getValue("TEST_PAYLOAD_SIZE"));
 				PEASHeader header = new PEASHeader();
@@ -225,9 +216,9 @@ public class QueryHandler extends SimpleChannelInboundHandler<PEASMessage> {
 	                @Override
 	                public void operationComplete(ChannelFuture future) {
 	                    if (future.isSuccess()) {
-	                    	//System.out.println("return query successful");
+	                    	System.out.println("return query successful");
 	                    } else {
-	                        //System.out.println("return query failed");
+	                        System.out.println("return query failed");
 	                    }
 	                }
 	            });

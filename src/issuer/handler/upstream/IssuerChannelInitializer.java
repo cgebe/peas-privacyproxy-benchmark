@@ -10,9 +10,6 @@ import codec.PEASEncoder;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
-import io.netty.util.concurrent.DefaultEventExecutorGroup;
 
 public class IssuerChannelInitializer extends ChannelInitializer<SocketChannel> {
 	
